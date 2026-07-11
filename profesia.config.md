@@ -4,11 +4,11 @@
 
 **Última actualización:** _(sin configurar todavía)_
 
-## Negocio
+## Profesión
 
-- Nombre: _completar_
-- Rubro / tipo de negocio: _completar_
-- Tamaño del equipo: _completar_
+- Profesión u oficio: _completar_
+- Nombre (personal o de tu estudio/marca): _completar_
+- ¿Trabajás solo/a o con equipo?: _completar_
 
 ## Datos de referencia para los agentes
 
@@ -21,7 +21,7 @@
 
 ## Agentes activos
 
-Marcados durante el onboarding según las respuestas sobre el negocio. Los que no están tildados igual quedan instalados — simplemente no son prioridad para este negocio y se pueden usar igual cuando haga falta.
+Marcados durante el onboarding según tu profesión y cómo trabajás. Los que no están tildados igual quedan instalados — simplemente no son prioridad para vos y se pueden usar igual cuando haga falta.
 
 ### Equipo 1 · Comunicación
 

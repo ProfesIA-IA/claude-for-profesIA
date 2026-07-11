@@ -1,7 +1,7 @@
 ---
 name: configuracion-inicial
 description: >
-  Use this skill when the user has just installed the agentes-profesia plugin and wants to set it up, or when they ask things like "configurar profesia", "empezar con los agentes de profesia", "qué agentes me sirven", "cuáles agentes de profesia debería usar", "onboarding de profesia", "instalé el plugin, ¿ahora qué?", or "quiero saber qué agentes me convienen para mi negocio".
+  Use this skill when the user has just installed the agentes-profesia plugin and wants to set it up, or when they ask things like "configurar profesia", "empezar con los agentes de profesia", "qué agentes me sirven", "cuáles agentes de profesia debería usar", "onboarding de profesia", "instalé el plugin, ¿ahora qué?", or "quiero saber qué agentes me convienen para mi profesión".
 metadata:
   version: "0.1.0"
 ---
@@ -9,12 +9,15 @@ metadata:
 # Configuración inicial de Agentes ProfesIA
 
 Guiá al usuario, con preguntas cortas, para descubrir cuáles de los 27 agentes de ProfesIA le sirven a
-SU negocio en particular, y dejá esa decisión (más los datos de referencia del negocio) guardada en
-`profesia.config.md` en la raíz del proyecto. El resto de los agentes leen ese archivo antes de
-preguntarle al usuario datos que ya dio, así no se repite la misma información sesión tras sesión.
+SU profesión u oficio en particular, y dejá esa decisión (más los datos de referencia que declaró)
+guardada en `profesia.config.md` en la raíz del proyecto. El resto de los agentes leen ese archivo
+antes de preguntarle al usuario datos que ya dio, así no se repite la misma información sesión tras sesión.
 
 No expliques la arquitectura del plugin ni menciones nombres de archivos técnicos salvo que el usuario
-pregunte — hablale en términos de "tu negocio" y "qué te conviene usar".
+pregunte — hablale en términos de "tu profesión" / "tu trabajo" y "qué te conviene usar". No le preguntes
+por "tu negocio": arrancá siempre preguntando cuál es su profesión u oficio, sea que trabaje en relación
+de dependencia, de forma independiente, con un comercio o con un estudio — el punto de partida es la
+persona y a qué se dedica, no una empresa.
 
 ## Catálogo completo de agentes (referencia interna)
 
@@ -59,23 +62,23 @@ pregunte — hablale en términos de "tu negocio" y "qué te conviene usar".
 ## Paso 1 · Explicar en una línea
 
 Antes de preguntar nada, decí en 1-2 frases qué vas a hacer: le vas a hacer unas preguntas rápidas
-sobre el negocio para armar la lista de agentes que más le sirven, y va a quedar guardado para no
-tener que repetirlo.
+sobre su profesión y cómo trabaja para armar la lista de agentes que más le sirven, y va a quedar
+guardado para no tener que repetirlo.
 
-## Paso 2 · Preguntas sobre el negocio
+## Paso 2 · Preguntas sobre su profesión y cómo trabaja
 
 Usá la herramienta de preguntas (AskUserQuestion) — de a una o dos preguntas por vez, no todas juntas.
-Como mínimo cubrí estos ejes (adaptá la redacción, no hace falta preguntar literalmente esto si el
-usuario ya lo contó en su mensaje inicial):
+Arrancá siempre por la profesión. Como mínimo cubrí estos ejes (adaptá la redacción, no hace falta
+preguntar literalmente esto si el usuario ya lo contó en su mensaje inicial):
 
-1. **Rubro y tamaño**: ¿A qué se dedica el negocio (comercio, servicios profesionales, consultorio/estudio,
-   gastronomía, cursos/educación, otro) y cuántas personas lo llevan adelante?
-2. **Atención al cliente**: ¿Recibe consultas repetidas por WhatsApp/Instagram (precio, horario,
-   disponibilidad)? ¿Da turnos o citas?
-3. **Administración**: ¿Factura? ¿Lleva control de ingresos/egresos? ¿Maneja stock o inventario?
-4. **Documentos**: ¿Redacta contratos, propuestas, informes o expedientes largos con frecuencia?
-5. **Contenido y ventas**: ¿Genera contenido para redes sociales? ¿Arma presupuestos o cotizaciones a medida?
-6. **Organización**: ¿Coordina un equipo de más de una persona? ¿Necesita ayuda para planificar su agenda
+1. **Profesión u oficio**: ¿Cuál es tu profesión u oficio (abogado/a, contador/a, diseñador/a, docente,
+   terapeuta/profesional de la salud, comerciante, consultor/a, otro) y trabajás solo/a o con un equipo?
+2. **Atención a clientes/pacientes/alumnos**: ¿Recibís consultas repetidas por WhatsApp/Instagram (precio,
+   horario, disponibilidad)? ¿Das turnos o citas?
+3. **Administración**: ¿Facturás? ¿Llevás control de ingresos/egresos? ¿Manejás stock o inventario?
+4. **Documentos**: ¿Redactás contratos, propuestas, informes o expedientes largos con frecuencia?
+5. **Contenido y ventas**: ¿Generás contenido para redes sociales? ¿Armás presupuestos o cotizaciones a medida?
+6. **Organización**: ¿Coordinás un equipo de más de una persona? ¿Necesitás ayuda para planificar tu agenda
    o proyectos?
 
 ## Paso 3 · Mapear respuestas a agentes recomendados
@@ -99,7 +102,7 @@ Usando el catálogo de arriba y las respuestas, armá una lista de agentes recom
 Mostrale la lista recomendada (agrupada por equipo, en lenguaje simple) y dejalo agregar o sacar
 agentes antes de guardar nada.
 
-## Paso 4 · Datos de referencia del negocio
+## Paso 4 · Datos de referencia
 
 Preguntale SOLO los datos de referencia que necesitan los agentes que quedaron activos (no preguntes
 todo si no aplica). Por ejemplo: horarios de atención y formas de pago si activó `tincho-mensajero` o
@@ -109,7 +112,7 @@ tarifario si activó `gaston-presupuestador` o `santi-vendedor`.
 ## Paso 5 · Guardar la configuración
 
 Escribí (o actualizá si ya existe) el archivo `profesia.config.md` en la raíz del proyecto con:
-nombre y rubro del negocio, los datos de referencia recolectados, y la lista de agentes activos
+su profesión/oficio y nombre, los datos de referencia recolectados, y la lista de agentes activos
 tildados con `[x]` (dejá el resto de los 27 sin tildar, siguen instalados igual). Actualizá también la
 fecha de "Última actualización".
 
@@ -117,5 +120,5 @@ fecha de "Última actualización".
 
 Resumí en pocas líneas qué agentes quedaron activos y un ejemplo concreto de cómo invocar a uno de
 ellos (ej. "usá a Tincho para responder este WhatsApp: ..."). Aclará que puede volver a correr este
-mismo proceso cuando quiera (por ejemplo si suma un rubro nuevo o cambian los precios) para actualizar
+mismo proceso cuando quiera (por ejemplo si cambia de actividad o cambian sus precios) para actualizar
 `profesia.config.md`.

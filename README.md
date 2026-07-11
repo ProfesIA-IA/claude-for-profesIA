@@ -73,12 +73,12 @@ Abrí el archivo `agentes-profesia.plugin` que te compartieron en el chat y acep
 
 ## Primer uso: configurar qué agentes te sirven
 
-Apenas instales el plugin (o descargues esta carpeta y la pongas en la raíz de tu proyecto), decile a Claude algo como **"configurar profesia"** o **"qué agentes me sirven para mi negocio"**. Esto dispara la skill `configuracion-inicial`, que te va a hacer unas preguntas cortas sobre tu negocio (rubro, si atendés por WhatsApp, si das turnos, si facturás, si manejás stock, si generás contenido, etc.) y con eso arma/actualiza el archivo **`profesia.config.md`** en la raíz del proyecto con:
+Apenas instales el plugin (o descargues esta carpeta y la pongas en la raíz de tu proyecto), decile a Claude algo como **"configurar profesia"** o **"qué agentes me sirven para mi profesión"**. Esto dispara la skill `configuracion-inicial`, que te va a hacer unas preguntas cortas — arrancando por cuál es tu profesión u oficio, no por si tenés una empresa — y sigue con cómo trabajás (si atendés por WhatsApp, si das turnos, si facturás, si manejás stock, si generás contenido, etc.). Con eso arma/actualiza el archivo **`profesia.config.md`** en la raíz del proyecto con:
 
-- los datos del negocio que los agentes van a necesitar (horarios, precios, formas de pago, condición fiscal...), así no te los vuelven a preguntar cada vez, y
-- una lista de qué agentes de los 27 te conviene usar según tu caso (los demás quedan igual instalados, simplemente no son la prioridad para tu negocio).
+- los datos de referencia que los agentes van a necesitar (horarios, precios, formas de pago, condición fiscal...), así no te los vuelven a preguntar cada vez, y
+- una lista de qué agentes de los 27 te conviene usar según tu caso (los demás quedan igual instalados, simplemente no son la prioridad para vos).
 
-Podés volver a correr este proceso cuando quieras (por ejemplo si cambian tus precios o sumás un rubro nuevo) para actualizar `profesia.config.md`.
+Podés volver a correr este proceso cuando quieras (por ejemplo si cambian tus precios o cambiás de actividad) para actualizar `profesia.config.md`.
 
 ## Cómo probarlo
 
