@@ -52,18 +52,24 @@ Cada agente es un asistente de Claude con un rol acotado (redactar, resumir, cal
 
 ### Opción A · Claude Code (línea de comandos)
 
-1. Descomprimí el archivo `agentes-profesia.plugin` (es un .zip) en una carpeta, por ejemplo `agentes-profesia/`.
-2. Copiá esa carpeta dentro de tu proyecto en `.claude/agents-profesia/` o instalala como plugin:
-   ```bash
-   claude plugin marketplace add <tu-usuario>/<tu-repo>
-   claude plugin install agentes-profesia
-   ```
-   (Esto funciona una vez que subas el contenido de esta carpeta a un repositorio de GitHub.)
-3. También podés instalar los agentes a mano sin usar el sistema de plugins: copiá los archivos de `agents/*.md` a `~/.claude/agents/` (para tenerlos en todos tus proyectos) o a `.claude/agents/` dentro de un proyecto puntual.
+Este repositorio es a la vez un marketplace y un plugin (todo vive en la raíz: `.claude-plugin/plugin.json` + `.claude-plugin/marketplace.json`). Una vez que esté pusheado a GitHub:
+
+```bash
+claude plugin marketplace add ProfesIA-Profesionales-en-IA/claude-for-profesIA
+claude plugin install agentes-profesia@profesia-plugins
+```
+
+Para actualizar cuando cambien los agentes:
+
+```bash
+claude plugin marketplace update profesia-plugins
+```
+
+También podés instalar los agentes a mano sin usar el sistema de plugins: copiá los archivos de `agents/*.md` a `~/.claude/agents/` (para tenerlos en todos tus proyectos) o a `.claude/agents/` dentro de un proyecto puntual.
 
 ### Opción B · Cowork (Claude desktop)
 
-Abrí el archivo `agentes-profesia.plugin` que te compartí en el chat y aceptá la instalación con el botón que aparece en la vista previa.
+Abrí el archivo `agentes-profesia.plugin` que te compartieron en el chat y aceptá la instalación con el botón que aparece en la vista previa.
 
 ## Cómo probarlo
 
@@ -75,13 +81,14 @@ Una vez instalado, pedile a Claude que use un agente puntual por nombre, por eje
 
 Claude va a detectar automáticamente cuál de los 27 agentes conviene usar según lo que pidas, o podés nombrarlo directamente para forzar ese agente.
 
-## Estructura del plugin
+## Estructura del repo
 
 ```
-agentes-profesia/
+claude-for-profesIA/
 ├── .claude-plugin/
-│   └── plugin.json
-├── agents/          # 27 archivos .md, uno por agente
+│   ├── plugin.json         # manifiesto del plugin
+│   └── marketplace.json    # catálogo (permite 'claude plugin marketplace add')
+├── agents/                 # 27 archivos .md, uno por agente
 └── README.md
 ```
 

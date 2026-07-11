@@ -1,0 +1,15 @@
+{
+  "name": "profesia-plugins",
+  "owner": {
+    "name": "ProfesIA"
+  },
+  "description": "Marketplace de plugins de Claude de ProfesIA.",
+  "plugins": [
+    {
+      "name": "agentes-profesia",
+      "source": "./",
+      "description": "Staff de 27 agentes de IA de ProfesIA (Tincho, Meli, Ramiro, Rita, Beto y compania) para automatizar comunicacion, administracion, documentos, contenido/ventas y organizacion en pymes, comercios, estudios y consultorios.",
+      "version": "0.1.0"
+    }
+  ]
+}
