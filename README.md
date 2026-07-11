@@ -55,7 +55,7 @@ Cada agente es un asistente de Claude con un rol acotado (redactar, resumir, cal
 Este repositorio es a la vez un marketplace y un plugin (todo vive en la raíz: `.claude-plugin/plugin.json` + `.claude-plugin/marketplace.json`). Una vez que esté pusheado a GitHub:
 
 ```bash
-claude plugin marketplace add ProfesIA-Profesionales-en-IA/claude-for-profesIA
+claude plugin marketplace add ProfesIA-IA/claude-for-profesIA
 claude plugin install agentes-profesia@profesia-plugins
 ```
 
