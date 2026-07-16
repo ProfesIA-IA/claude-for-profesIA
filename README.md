@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://ftdfdozojlgvffomivrm.supabase.co/storage/v1/object/public/cursos-imagenes/profesia-agentes/c1000001-0001-4001-8001-000000000001.png" width="72" alt="ProfesIA">
+  <img src="https://bolsadetrabajo.profesia.site/assets/logo-white.png" width="220" alt="ProfesIA">
 </p>
 
 <h1 align="center">Agentes ProfesIA</h1>
