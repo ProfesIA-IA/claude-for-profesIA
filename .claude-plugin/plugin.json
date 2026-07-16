@@ -1,10 +1,10 @@
 {
   "name": "agentes-profesia",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Staff de 27 agentes de IA de ProfesIA (Tincho, Meli, Ramiro, Rita, Beto y compania) para automatizar comunicacion, administracion, documentos, contenido/ventas y organizacion en pymes, comercios, estudios y consultorios.",
   "author": {
     "name": "ProfesIA"
   },
   "license": "MIT",
-  "keywords": ["profesia", "pyme", "automatizacion", "whatsapp", "administracion", "agentes", "spanish"]
+  "keywords": ["profesia", "pyme", "automatizacion", "whatsapp", "administracion", "agentes", "segundo-cerebro", "spanish"]
 }

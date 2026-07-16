@@ -1,0 +1,174 @@
+{
+  "equipos": [
+    {
+      "id": "equipo-1",
+      "nombre": "Equipo 1 · Comunicación",
+      "descripcion": "Atienden mensajes, turnos y seguimiento de clientes en WhatsApp/Instagram/mail.",
+      "agentes": [
+        {
+          "slug": "tincho-mensajero",
+          "display": "Tincho · el Mensajero",
+          "one_liner": "Responde los WhatsApp y DM repetidos (precios, horarios, disponibilidad, preguntas frecuentes) las 24 horas."
+        },
+        {
+          "slug": "meli-recepcionista",
+          "display": "Meli · la Recepcionista",
+          "one_liner": "Agenda turnos, confirma citas y arma recordatorios sin superponer horarios."
+        },
+        {
+          "slug": "ramiro-redactor",
+          "display": "Ramiro · el Redactor",
+          "one_liner": "Deja el borrador de cada respuesta listo para revisar y enviar, escrito en tu tono."
+        },
+        {
+          "slug": "sofi-postventa",
+          "display": "Sofi · la Postventa",
+          "one_liner": "Hace seguimiento a clientes, pide reseñas y reactiva a los que dejaron de venir."
+        },
+        {
+          "slug": "lucho-filtro",
+          "display": "Lucho · el Filtro",
+          "one_liner": "Clasifica todo lo que entra por urgencia y tema, y deja pasar solo lo que necesita tu atención."
+        }
+      ]
+    },
+    {
+      "id": "equipo-2",
+      "nombre": "Equipo 2 · Datos y administración",
+      "descripcion": "Ordenan plata, stock, facturación y reportes del negocio.",
+      "agentes": [
+        {
+          "slug": "rita-reportes",
+          "display": "Rita · la de Reportes",
+          "one_liner": "Arma el informe del período con formato profesional a partir de datos crudos."
+        },
+        {
+          "slug": "beto-contador",
+          "display": "Beto · el Contador",
+          "one_liner": "Ordena ingresos y egresos, cierra balances por mes y por producto, y te dice qué deja plata."
+        },
+        {
+          "slug": "facu-facturador",
+          "display": "Facu · el Facturador",
+          "one_liner": "Genera y organiza las facturas a partir de los datos cargados una sola vez."
+        },
+        {
+          "slug": "nacho-deposito",
+          "display": "Nacho · el del Depósito",
+          "one_liner": "Controla el stock, avisa cuando algo baja del mínimo y arma la planilla de reposición."
+        },
+        {
+          "slug": "carla-conciliadora",
+          "display": "Carla · la Conciliadora",
+          "one_liner": "Cruza pagos, cuentas y comprobantes para detectar diferencias y errores."
+        },
+        {
+          "slug": "pili-planillas",
+          "display": "Pili · la de Planillas",
+          "one_liner": "Convierte datos sueltos en planillas ordenadas y las mantiene actualizadas."
+        },
+        {
+          "slug": "vera-analista",
+          "display": "Vera · la Analista",
+          "one_liner": "Toma tu histórico y proyecta ventas, gastos y demanda a futuro."
+        },
+        {
+          "slug": "coco-cobrador",
+          "display": "Coco · el Cobrador",
+          "one_liner": "Detecta vencimientos y genera los avisos de cobranza a tiempo."
+        }
+      ]
+    },
+    {
+      "id": "equipo-3",
+      "nombre": "Equipo 3 · Documentos y conocimiento",
+      "descripcion": "Redactan, corrigen y buscan información en documentos propios.",
+      "agentes": [
+        {
+          "slug": "sole-resumidora",
+          "display": "Sole · la Resumidora",
+          "one_liner": "Condensa documentos largos, reuniones o expedientes en lo esencial, con los plazos marcados."
+        },
+        {
+          "slug": "dante-archivista",
+          "display": "Dante · el Archivista",
+          "one_liner": "Encuentra al toque cualquier dato dentro de tus documentos, sin salir a internet."
+        },
+        {
+          "slug": "pedro-escribano",
+          "display": "Pedro · el Escribano",
+          "one_liner": "Redacta contratos, propuestas e informes desde tus plantillas y datos."
+        },
+        {
+          "slug": "emma-correctora",
+          "display": "Emma · la Correctora",
+          "one_liner": "Revisa, corrige y estandariza cada texto según tus criterios."
+        },
+        {
+          "slug": "bruno-investigador",
+          "display": "Bruno · el Investigador",
+          "one_liner": "Releva información sobre un tema y te la entrega ordenada y lista para usar."
+        }
+      ]
+    },
+    {
+      "id": "equipo-4",
+      "nombre": "Equipo 4 · Contenido y ventas",
+      "descripcion": "Generan contenido, presupuestos y guían al cliente hacia la compra.",
+      "agentes": [
+        {
+          "slug": "zoe-creadora",
+          "display": "Zoe · la Creadora",
+          "one_liner": "Genera posts, textos para redes e ideas de publicación."
+        },
+        {
+          "slug": "milo-disenador",
+          "display": "Milo · el Diseñador",
+          "one_liner": "Arma las placas, flyers y promos visuales."
+        },
+        {
+          "slug": "juana-copy",
+          "display": "Juana · la Copy",
+          "one_liner": "Escribe los textos de venta, descripciones de producto y anuncios."
+        },
+        {
+          "slug": "gaston-presupuestador",
+          "display": "Gastón · el Presupuestador",
+          "one_liner": "Arma presupuestos y cotizaciones personalizadas al instante."
+        },
+        {
+          "slug": "santi-vendedor",
+          "display": "Santi · el Vendedor",
+          "one_liner": "Responde consultas comerciales y guía al cliente hacia la compra."
+        }
+      ]
+    },
+    {
+      "id": "equipo-5",
+      "nombre": "Equipo 5 · Organización y productividad",
+      "descripcion": "Organizan agenda, planes de trabajo, minutas y reparto de tareas.",
+      "agentes": [
+        {
+          "slug": "feli-agenda",
+          "display": "Feli · el de la Agenda",
+          "one_liner": "Organiza tu día, reprograma y evita que se te superpongan las cosas."
+        },
+        {
+          "slug": "maru-planificadora",
+          "display": "Maru · la Planificadora",
+          "one_liner": "Arma tu plan de trabajo o estudio según tus objetivos y tiempos."
+        },
+        {
+          "slug": "tomi-minutas",
+          "display": "Tomi · el de Minutas",
+          "one_liner": "Toma nota de cada reunión y deja las tareas y acuerdos por escrito."
+        },
+        {
+          "slug": "lola-coordinadora",
+          "display": "Lola · la Coordinadora",
+          "one_liner": "Reparte y sigue las tareas entre las personas de tu equipo."
+        }
+      ]
+    }
+  ]
+}

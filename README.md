@@ -116,6 +116,15 @@ Apenas instales el plugin (o descargues esta carpeta y la pongas en la raíz de 
 
 Podés volver a correr este proceso cuando quieras (por ejemplo si cambian tus precios o cambiás de actividad) para actualizar `profesia.config.md`.
 
+## Segundo cerebro: mapa visual de tus agentes
+
+Decile a Claude **"generá mi segundo cerebro"** o **"quiero ver el mapa de mis agentes"** para que arme una página interactiva (`segundo-cerebro/index.html`, se abre con doble click, sin servidor) con un mapa de nodos estilo ProfesIA que muestra:
+
+- los 27 agentes agrupados por equipo, con un núcleo central que se expande al hacer click en cada equipo, y
+- un cluster aparte con la información que ya cargaste en `profesia.config.md` (profesión, datos de referencia, agentes activos), para que veas de un vistazo qué tan completa está tu configuración.
+
+Dispara la skill `segundo-cerebro`. Podés volver a generarlo cuando quieras (por ejemplo después de correr `configuracion-inicial` de nuevo) para que refleje los cambios.
+
 ## Cómo probarlo
 
 Una vez instalado, pedile a Claude que use un agente puntual por nombre, por ejemplo:
@@ -135,8 +144,11 @@ claude-for-profesIA/
 │   └── marketplace.json         # catálogo (permite 'claude plugin marketplace add')
 ├── agents/                      # 27 archivos .md, uno por agente
 ├── skills/
-│   └── configuracion-inicial/
-│       └── SKILL.md             # onboarding: pregunta y arma la configuración inicial
+│   ├── configuracion-inicial/
+│   │   └── SKILL.md             # onboarding: pregunta y arma la configuración inicial
+│   └── segundo-cerebro/
+│       ├── SKILL.md             # genera el mapa visual de agentes + configuración cargada
+│       └── references/          # motor de la visualización (HTML/CSS/JS) + catálogo de agentes
 ├── profesia.config.md            # se completa la primera vez que se corre el onboarding
 └── README.md
 ```
