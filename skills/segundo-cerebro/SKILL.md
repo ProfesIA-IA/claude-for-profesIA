@@ -73,6 +73,11 @@ Un cluster por cada uno de los 5 equipos (usá `agentes.json` para nombre/descri
 un 6to cluster "Tu información cargada" con los datos de `profesia.config.md`. No agregues clusters
 inventados ni agentes que no estén en `agentes.json`.
 
+Si además existe `profesia.sops.md` en la raíz del proyecto (procesos documentados con la skill
+`documentar-procesos`), sumá un 7mo cluster "Procesos documentados" con un nodo por cada
+sección `##` de ese archivo (`titulo` = nombre del proceso, `detalle` = su "Cuándo se usa"). Si el
+archivo no existe todavía, simplemente omitilo — no lo inventes.
+
 ## Paso 3 · Generar los archivos de salida
 
 1. Elegí como carpeta de salida `segundo-cerebro/` en la raíz del proyecto (creala si no existe).

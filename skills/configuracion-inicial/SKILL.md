@@ -1,17 +1,25 @@
 ---
 name: configuracion-inicial
 description: >
-  Use this skill when the user has just installed the agentes-profesia plugin and wants to set it up, or when they ask things like "configurar profesia", "empezar con los agentes de profesia", "qué agentes me sirven", "cuáles agentes de profesia debería usar", "onboarding de profesia", "instalé el plugin, ¿ahora qué?", or "quiero saber qué agentes me convienen para mi profesión".
+  Use this skill when the user has just installed the agentes-profesia plugin and wants to set it up, or when they ask things like "configurar profesia", "empezar con los agentes de profesia", "qué agentes me sirven", "cuáles agentes de profesia debería usar", "onboarding de profesia", "instalé el plugin, ¿ahora qué?", "quiero saber qué agentes me convienen para mi profesión". Also use it as a lightweight recurring check-in when the setup already exists and the user says things like "en qué quedé", "quiero anotar en qué estoy trabajando", "con qué sigo hoy", "actualizá mi bitácora", or "quiero repasar mi configuración de profesia".
 metadata:
-  version: "0.1.0"
+  version: "0.2.0"
 ---
 
 # Configuración inicial de Agentes ProfesIA
 
-Guiá al usuario, con preguntas cortas, para descubrir cuáles de los 27 agentes de ProfesIA le sirven a
-SU profesión u oficio en particular, y dejá esa decisión (más los datos de referencia que declaró)
-guardada en `profesia.config.md` en la raíz del proyecto. El resto de los agentes leen ese archivo
-antes de preguntarle al usuario datos que ya dio, así no se repite la misma información sesión tras sesión.
+Esta skill tiene DOS modos. Fijate primero si existe `profesia.config.md` en la raíz del proyecto y
+si ya tiene la Profesión completada (no dice `_completar_`):
+
+- **No existe o está vacío → Modo A (setup completo):** Paso 1 a 6.
+- **Ya existe y está completo → Modo B (check-in / bitácora):** saltá directo al Paso 7. Solo volvé
+  a correr el setup completo si el usuario lo pide explícitamente (ej. "cambié de actividad",
+  "quiero rehacer mi configuración").
+
+El objetivo de fondo no es solo activar agentes: es que `profesia.config.md` funcione como la
+memoria compartida de la persona con sus 27 agentes (su "system prompt" personal), que entendamos
+su dolor operativo y su zona de genio, y que los agentes se usen también como agenda del día a día.
+La meta es sacarle entre 60% y 70% de la carga operativa de encima, no solo resolver tareas sueltas.
 
 No expliques la arquitectura del plugin ni menciones nombres de archivos técnicos salvo que el usuario
 pregunte — hablale en términos de "tu profesión" / "tu trabajo" y "qué te conviene usar". No le preguntes
@@ -59,11 +67,14 @@ persona y a qué se dedica, no una empresa.
 - `lola-coordinadora` — Lola · la Coordinadora: Reparte y sigue las tareas entre las personas de tu equipo.
 
 
+# MODO A · Setup completo (primera vez)
+
 ## Paso 1 · Explicar en una línea
 
 Antes de preguntar nada, decí en 1-2 frases qué vas a hacer: le vas a hacer unas preguntas rápidas
-sobre su profesión y cómo trabaja para armar la lista de agentes que más le sirven, y va a quedar
-guardado para no tener que repetirlo.
+sobre su profesión, su día a día y qué le pesa más del trabajo operativo, para armar la lista de
+agentes que más le sirven y dejarlos configurados para su caso — y que esto va a quedar guardado
+como memoria para no repetir lo mismo cada vez.
 
 ## Paso 2 · Preguntas sobre su profesión y cómo trabaja
 
@@ -81,10 +92,24 @@ preguntar literalmente esto si el usuario ya lo contó en su mensaje inicial):
 6. **Organización**: ¿Coordinás un equipo de más de una persona? ¿Necesitás ayuda para planificar tu agenda
    o proyectos?
 
-## Paso 3 · Mapear respuestas a agentes recomendados
+## Paso 3 · Detectar el dolor operativo y la zona de genio
 
-Usando el catálogo de arriba y las respuestas, armá una lista de agentes recomendados. Guía general
-(no es una regla rígida, usá criterio):
+Esto es tan importante como elegir agentes — no lo saltees. Preguntale (con AskUserQuestion, en
+lenguaje simple, sin jerga de "productividad"):
+
+1. **Dolor operativo**: "De todo lo que hacés en una semana típica, ¿qué es lo repetitivo que más
+   tiempo te quita o que más bronca/estrés te genera?" (buscá tareas concretas: responder lo mismo
+   por WhatsApp, facturar, cargar planillas, perseguir cobros, etc.)
+2. **Zona de genio**: "¿Y en qué tarea de tu trabajo sentís que rendís mejor o más disfrutás — la
+   que harías vos igual aunque nadie te lo pidiera?"
+
+Guardá las respuestas tal cual las dijo, sin reinterpretarlas de más.
+
+## Paso 4 · Mapear respuestas a agentes recomendados
+
+Usando el catálogo de arriba, las respuestas del Paso 2 y el dolor detectado en el Paso 3, armá una
+lista de agentes recomendados priorizando lo que más le pesa. Guía general (no es una regla rígida,
+usá criterio):
 
 - Consultas repetidas por WhatsApp/redes → equipo Comunicación (`tincho-mensajero`, `lucho-filtro`;
   sumar `meli-recepcionista` si da turnos, `sofi-postventa` si quiere fidelizar clientes, `ramiro-redactor`
@@ -100,25 +125,46 @@ Usando el catálogo de arriba y las respuestas, armá una lista de agentes recom
   (`feli-agenda`, `maru-planificadora`, `tomi-minutas`, `lola-coordinadora`).
 
 Mostrale la lista recomendada (agrupada por equipo, en lenguaje simple) y dejalo agregar o sacar
-agentes antes de guardar nada.
+agentes antes de guardar nada. Priorizá siempre los agentes que atacan directamente el dolor que
+declaró en el Paso 3.
 
-## Paso 4 · Datos de referencia
+## Paso 5 · Un caso de uso concreto por agente
 
-Preguntale SOLO los datos de referencia que necesitan los agentes que quedaron activos (no preguntes
-todo si no aplica). Por ejemplo: horarios de atención y formas de pago si activó `tincho-mensajero` o
-`meli-recepcionista`; condición fiscal si activó `facu-facturador` o `beto-contador`; rango de precios o
-tarifario si activó `gaston-presupuestador` o `santi-vendedor`.
+Para CADA uno de los 27 agentes (no solo los recomendados) escribí una línea de "caso de uso
+concreto" adaptada a la profesión real de la persona — no repitas el one-liner genérico del
+catálogo, armá un ejemplo puntual con su propio contexto. Ejemplo: si es kinesiólogo/a y activó a
+Meli, el caso de uso no es "agenda turnos" (genérico) sino algo como "Meli: cuando un paciente te
+escribe pidiendo turno para la rodilla, te revisa la agenda de la semana y te propone 2-3 horarios
+libres sin pisar otra sesión". Si un agente no aplica directamente a su rubro, armá igual un caso
+de uso plausible (todos los agentes quedan instalados, no solo los recomendados).
 
-## Paso 5 · Guardar la configuración
+## Paso 6 · Datos de referencia y guardado
 
-Escribí (o actualizá si ya existe) el archivo `profesia.config.md` en la raíz del proyecto con:
-su profesión/oficio y nombre, los datos de referencia recolectados, y la lista de agentes activos
-tildados con `[x]` (dejá el resto de los 27 sin tildar, siguen instalados igual). Actualizá también la
-fecha de "Última actualización".
+1. Preguntale SOLO los datos de referencia que necesitan los agentes que quedaron activos (no
+   preguntes todo si no aplica). Por ejemplo: horarios de atención y formas de pago si activó
+   `tincho-mensajero` o `meli-recepcionista`; condición fiscal si activó `facu-facturador` o
+   `beto-contador`; rango de precios o tarifario si activó `gaston-presupuestador` o `santi-vendedor`.
+2. Escribí (o actualizá) `profesia.config.md` completo: profesión/oficio y nombre, dolor operativo,
+   zona de genio, datos de referencia, la lista de los 27 agentes con `[x]` en los activos y el
+   caso de uso concreto del Paso 5 debajo de cada uno, y actualizá la fecha de "Última actualización".
+3. Cerrá con Paso 8 (abajo).
 
-## Paso 6 · Cierre
+# MODO B · Check-in / bitácora (siguientes veces)
 
-Resumí en pocas líneas qué agentes quedaron activos y un ejemplo concreto de cómo invocar a uno de
-ellos (ej. "usá a Tincho para responder este WhatsApp: ..."). Aclará que puede volver a correr este
-mismo proceso cuando quiera (por ejemplo si cambia de actividad o cambian sus precios) para actualizar
-`profesia.config.md`.
+## Paso 7 · Preguntar en qué está y con qué sigue
+
+No repreguntes toda la configuración. Simplemente preguntale, en 1-2 líneas de tono cercano:
+"¿En qué estuviste trabajando (hoy o la última vez que hablamos) y con qué tarea querés seguir
+ahora?". Agregá una fila nueva a la tabla de "## Bitácora de trabajo (tu agenda)" en
+`profesia.config.md` con la fecha de hoy, qué avanzó y con qué sigue. Si de paso mencionó un dato
+nuevo (cambió un precio, un horario, empezó a usar un agente que no tenía activo), actualizá también
+esa sección puntual sin rehacer todo el archivo. Si pasó bastante tiempo desde la última actualización
+o cambió de actividad, ofrecele (sin insistir) rehacer el Modo A completo.
+
+# Cierre (ambos modos)
+
+## Paso 8 · Cierre
+
+Resumí en pocas líneas qué quedó activo/actualizado y un ejemplo concreto de cómo invocar a uno de
+los agentes (podés reusar uno de los casos de uso del Paso 5). Mencioná que puede volver a pedir
+"configurar profesia" o simplemente contar en qué está trabajando para que quede en la bitácora.

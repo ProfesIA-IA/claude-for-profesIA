@@ -109,12 +109,24 @@ Abrí el archivo `agentes-profesia.plugin` que te compartieron en el chat y acep
 
 ## Primer uso: configurar qué agentes te sirven
 
-Apenas instales el plugin (o descargues esta carpeta y la pongas en la raíz de tu proyecto), decile a Claude algo como **"configurar profesia"** o **"qué agentes me sirven para mi profesión"**. Esto dispara la skill `configuracion-inicial`, que te va a hacer unas preguntas cortas — arrancando por cuál es tu profesión u oficio, no por si tenés una empresa — y sigue con cómo trabajás (si atendés por WhatsApp, si das turnos, si facturás, si manejás stock, si generás contenido, etc.). Con eso arma/actualiza el archivo **`profesia.config.md`** en la raíz del proyecto con:
+Apenas instales el plugin (o descargues esta carpeta y la pongas en la raíz de tu proyecto), decile a Claude algo como **"configurar profesia"** o **"qué agentes me sirven para mi profesión"**. Esto dispara la skill `configuracion-inicial`, que te va a hacer unas preguntas cortas — arrancando por cuál es tu profesión u oficio, no por si tenés una empresa — y sigue con cómo trabajás (si atendés por WhatsApp, si das turnos, si facturás, si manejás stock, si generás contenido, etc.). Con eso arma/actualiza el archivo **`profesia.config.md`** en la raíz del proyecto, que funciona como tu memoria compartida con los 27 agentes (lo más parecido a un system prompt propio), con:
 
-- los datos de referencia que los agentes van a necesitar (horarios, precios, formas de pago, condición fiscal...), así no te los vuelven a preguntar cada vez, y
-- una lista de qué agentes de los 27 te conviene usar según tu caso (los demás quedan igual instalados, simplemente no son la prioridad para vos).
+- tu **dolor operativo** (las tareas repetitivas que más tiempo te quitan o más estrés te generan) y tu **zona de genio** (la tarea en la que más rendís), para que los agentes prioricen sacarte de encima lo primero y te consulten antes de meterse en lo segundo,
+- los datos de referencia que los agentes van a necesitar (horarios, precios, formas de pago, condición fiscal...), así no te los vuelven a preguntar cada vez,
+- una lista de los 27 agentes con un **caso de uso concreto pensado para tu profesión** en cada uno (no un ejemplo genérico), y
+- una **bitácora de trabajo** que funciona como tu agenda: la próxima vez que hables con Claude, te va a preguntar en qué quedaste y con qué querés seguir, y lo va anotando.
 
-Podés volver a correr este proceso cuando quieras (por ejemplo si cambian tus precios o cambiás de actividad) para actualizar `profesia.config.md`.
+Podés volver a pedir "configurar profesia" cuando quieras: si ya tenés todo configurado, la skill entra en modo check-in rápido (la bitácora) en vez de repreguntarte todo de nuevo.
+
+## Ayuda cuando estás trabado con algo puntual
+
+Decile a Claude **"tengo un problema con..."** o **"no sé cómo resolver esto"** para disparar la skill `ayuda`: te hace un par de preguntas para entender el problema y te arma un plan concreto con qué agente(s) usar y en qué orden.
+
+Si el problema vive en una página web (WhatsApp Web, Instagram, mail), esta skill empuja fuerte a que le des **control del navegador (Chrome)** a Claude: que entre, lea lo que te escribieron, lo ordene por urgencia con **Lucho · el Filtro** y te deje los borradores de respuesta listos con **Tincho** o **Ramiro** — vos siempre revisás y mandás, nada se envía solo.
+
+## Cargar tu forma de trabajar (SOPs)
+
+Decile a Claude **"quiero cargar información a mi segundo cerebro"** o **"te voy a enseñar cómo hago esto"** para disparar la skill `documentar-procesos`. Contale el paso a paso de cómo hacés una tarea puntual — **por escrito, por audio o por video**, como te resulte más cómodo — y ella lo convierte en un SOP (Procedimiento Operativo Estándar) guardado en **`profesia.sops.md`**, el documento de respaldo de procesos de tu segundo cerebro.
 
 ## Segundo cerebro: mapa visual de tus agentes
 
@@ -145,11 +157,16 @@ claude-for-profesIA/
 ├── agents/                      # 27 archivos .md, uno por agente
 ├── skills/
 │   ├── configuracion-inicial/
-│   │   └── SKILL.md             # onboarding: pregunta y arma la configuración inicial
+│   │   └── SKILL.md             # onboarding + check-in de bitácora
+│   ├── ayuda/
+│   │   └── SKILL.md             # triage de problemas puntuales + control de Chrome
+│   ├── documentar-procesos/
+│   │   └── SKILL.md             # carga procesos (texto/audio/video) como SOPs
 │   └── segundo-cerebro/
 │       ├── SKILL.md             # genera el mapa visual de agentes + configuración cargada
 │       └── references/          # motor de la visualización (HTML/CSS/JS) + catálogo de agentes
-├── profesia.config.md            # se completa la primera vez que se corre el onboarding
+├── profesia.config.md            # memoria compartida: profesión, dolor, zona de genio, agentes, bitácora
+├── profesia.sops.md                # procesos documentados (se crea con la skill documentar-procesos)
 └── README.md
 ```
 
