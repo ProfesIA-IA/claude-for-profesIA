@@ -118,6 +118,8 @@ Apenas instales el plugin (o descargues esta carpeta y la pongas en la raíz de 
 
 Podés volver a pedir "configurar profesia" cuando quieras: si ya tenés todo configurado, la skill entra en modo check-in rápido (la bitácora) en vez de repreguntarte todo de nuevo.
 
+El onboarding también deja un bloque corto en **`CLAUDE.md`** (en la raíz del proyecto) que apunta a estos archivos. `CLAUDE.md` es el que Claude Code/Cowork carga automáticamente al abrir el proyecto — así, apenas lo abrís, ya sabe que existe tu perfil y va a leer `profesia.config.md` (y `profesia.sops.md` si existe) antes de responderte, sin que tengas que pedirlo. No duplica tu perfil ahí adentro — solo referencia los archivos que sí lo tienen, para no gastar contexto de más en cada sesión. Si el proyecto ya tenía su propio `CLAUDE.md` para otra cosa, el onboarding le agrega este bloque sin tocar el resto.
+
 ## Ayuda cuando estás trabado con algo puntual
 
 Decile a Claude **"tengo un problema con..."** o **"no sé cómo resolver esto"** para disparar la skill `ayuda`: te hace un par de preguntas para entender el problema y te arma un plan concreto con qué agente(s) usar y en qué orden.
@@ -165,8 +167,9 @@ claude-for-profesIA/
 │   └── segundo-cerebro/
 │       ├── SKILL.md             # genera el mapa visual de agentes + configuración cargada
 │       └── references/          # motor de la visualización (HTML/CSS/JS) + catálogo de agentes
-├── profesia.config.md            # memoria compartida: profesión, dolor, zona de genio, agentes, bitácora
+├── profesia.config.md            # perfil real: profesión, dolor, zona de genio, agentes, bitácora
 ├── profesia.sops.md                # procesos documentados (se crea con la skill documentar-procesos)
+├── CLAUDE.md                     # ancla auto-cargada: referencia a los 2 archivos de arriba
 └── README.md
 ```
 

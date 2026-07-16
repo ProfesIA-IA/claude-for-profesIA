@@ -147,7 +147,23 @@ de uso plausible (todos los agentes quedan instalados, no solo los recomendados)
 2. Escribí (o actualizá) `profesia.config.md` completo: profesión/oficio y nombre, dolor operativo,
    zona de genio, datos de referencia, la lista de los 27 agentes con `[x]` en los activos y el
    caso de uso concreto del Paso 5 debajo de cada uno, y actualizá la fecha de "Última actualización".
-3. Cerrá con Paso 8 (abajo).
+3. **Anclá `profesia.config.md` en `CLAUDE.md`** (raíz del proyecto): `CLAUDE.md`
+   se carga automático en cada sesión de Claude Code/Cowork, así que sirve como el punto de entrada
+   que le avisa a Claude que este perfil existe, sin tener que duplicar todo el contenido ahí.
+   - Si `CLAUDE.md` no existe todavía, creálo con el bloque de abajo como único contenido.
+   - Si ya existe (por ejemplo porque el proyecto lo usa para otra cosa, convenciones de código,
+     etc.), buscá si ya tiene un bloque entre `<!-- profesia:start -->` y `<!-- profesia:end -->`:
+     si existe, reemplazá SOLO ese bloque; si no existe, agregalo al final del archivo. Nunca borres
+     ni reescribas el resto del contenido de `CLAUDE.md` que no sea ese bloque.
+   - El bloque debe decir, en esencia: que este proyecto tiene el plugin Agentes ProfesIA instalado,
+     que antes de responder algo relacionado al trabajo/profesión de la persona hay que leer
+     `profesia.config.md` (perfil completo: profesión, dolor, zona de genio, datos de referencia,
+     agentes activos + casos de uso, bitácora) y `profesia.sops.md` si existe (procesos
+     documentados), y que están disponibles las skills `configuracion-inicial`, `ayuda`,
+     `documentar-procesos` y `segundo-cerebro`. No copies el perfil real de la persona
+     dentro de este bloque — es una referencia, no una copia; el detalle vive solo en
+     `profesia.config.md`.
+4. Cerrá con Paso 8 (abajo).
 
 # MODO B · Check-in / bitácora (siguientes veces)
 
@@ -159,7 +175,10 @@ ahora?". Agregá una fila nueva a la tabla de "## Bitácora de trabajo (tu agend
 `profesia.config.md` con la fecha de hoy, qué avanzó y con qué sigue. Si de paso mencionó un dato
 nuevo (cambió un precio, un horario, empezó a usar un agente que no tenía activo), actualizá también
 esa sección puntual sin rehacer todo el archivo. Si pasó bastante tiempo desde la última actualización
-o cambió de actividad, ofrecele (sin insistir) rehacer el Modo A completo.
+o cambió de actividad, ofrecele (sin insistir) rehacer el Modo A completo. De paso, si `CLAUDE.md`
+todavía no tiene el bloque `<!-- profesia:start -->` (por ejemplo porque el proyecto es viejo, de antes
+de este cambio), creálo ahora siguiendo las mismas reglas del Paso 6.3 — no hace falta repetir todo
+el resto del onboarding para eso.
 
 # Cierre (ambos modos)
 
@@ -167,4 +186,6 @@ o cambió de actividad, ofrecele (sin insistir) rehacer el Modo A completo.
 
 Resumí en pocas líneas qué quedó activo/actualizado y un ejemplo concreto de cómo invocar a uno de
 los agentes (podés reusar uno de los casos de uso del Paso 5). Mencioná que puede volver a pedir
-"configurar profesia" o simplemente contar en qué está trabajando para que quede en la bitácora.
+"configurar profesia" o simplemente contar en qué está trabajando para que quede en la bitácora. No
+hace falta que le expliques el detalle técnico de `CLAUDE.md` salvo que pregunte — para
+ella alcanza con saber que a partir de ahora Claude ya "sabe" quién es apenas abre el proyecto.
