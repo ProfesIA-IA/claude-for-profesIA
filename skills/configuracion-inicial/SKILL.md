@@ -3,23 +3,30 @@ name: configuracion-inicial
 description: >
   Use this skill when the user has just installed the agentes-profesia plugin and wants to set it up, or when they ask things like "configurar profesia", "empezar con los agentes de profesia", "qué agentes me sirven", "cuáles agentes de profesia debería usar", "onboarding de profesia", "instalé el plugin, ¿ahora qué?", "quiero saber qué agentes me convienen para mi profesión". Also use it as a lightweight recurring check-in when the setup already exists and the user says things like "en qué quedé", "quiero anotar en qué estoy trabajando", "con qué sigo hoy", "actualizá mi bitácora", or "quiero repasar mi configuración de profesia".
 metadata:
-  version: "0.2.0"
+  version: "0.3.0"
 ---
 
 # Configuración inicial de Agentes ProfesIA
 
-Esta skill tiene DOS modos. Fijate primero si existe `profesia.config.md` en la raíz del proyecto y
-si ya tiene la Profesión completada (no dice `_completar_`):
+**El vault (`profesia-vault/`) es la fuente de verdad — no `profesia.config.md`.** Este plugin pasó
+de un archivo único a notas atómicas estilo Obsidian; esta skill lee y escribe en esas notas. El
+archivo `profesia.config.md` (si existe en el proyecto) es un formato legado de una versión anterior
+del plugin: se puede mirar como referencia si el usuario lo tenía completado, pero nunca se le
+escribe nada nuevo.
 
-- **No existe o está vacío → Modo A (setup completo):** Paso 1 a 6.
-- **Ya existe y está completo → Modo B (check-in / bitácora):** saltá directo al Paso 7. Solo volvé
+Esta skill tiene DOS modos. Fijate primero si existe `profesia-vault/perfil.md` y si su campo
+`profesion` en el frontmatter ya tiene un valor (no está vacío `""`):
+
+- **Vacío o el archivo no existe → Modo A (setup completo):** Paso 1 a 6.
+- **Ya tiene profesión cargada → Modo B (check-in / bitácora):** saltá directo al Paso 7. Solo volvé
   a correr el setup completo si el usuario lo pide explícitamente (ej. "cambié de actividad",
   "quiero rehacer mi configuración").
 
-El objetivo de fondo no es solo activar agentes: es que `profesia.config.md` funcione como la
-memoria compartida de la persona con sus 27 agentes (su "system prompt" personal), que entendamos
-su dolor operativo y su zona de genio, y que los agentes se usen también como agenda del día a día.
-La meta es sacarle entre 60% y 70% de la carga operativa de encima, no solo resolver tareas sueltas.
+El objetivo de fondo no es solo activar agentes: es que el vault funcione como la memoria compartida
+de la persona con sus 27 agentes (su "system prompt" personal, ahora repartido en notas), que
+entendamos su dolor operativo y su zona de genio, y que los agentes se usen también como agenda del
+día a día. La meta es sacarle entre 60% y 70% de la carga operativa de encima, no solo resolver
+tareas sueltas.
 
 No expliques la arquitectura del plugin ni menciones nombres de archivos técnicos salvo que el usuario
 pregunte — hablale en términos de "tu profesión" / "tu trabajo" y "qué te conviene usar". No le preguntes
@@ -138,32 +145,38 @@ escribe pidiendo turno para la rodilla, te revisa la agenda de la semana y te pr
 libres sin pisar otra sesión". Si un agente no aplica directamente a su rubro, armá igual un caso
 de uso plausible (todos los agentes quedan instalados, no solo los recomendados).
 
-## Paso 6 · Datos de referencia y guardado
+## Paso 6 · Guardado en el vault
 
 1. Preguntale SOLO los datos de referencia que necesitan los agentes que quedaron activos (no
    preguntes todo si no aplica). Por ejemplo: horarios de atención y formas de pago si activó
    `tincho-mensajero` o `meli-recepcionista`; condición fiscal si activó `facu-facturador` o
    `beto-contador`; rango de precios o tarifario si activó `gaston-presupuestador` o `santi-vendedor`.
-2. Escribí (o actualizá) `profesia.config.md` completo: profesión/oficio y nombre, dolor operativo,
-   zona de genio, datos de referencia, la lista de los 27 agentes con `[x]` en los activos y el
-   caso de uso concreto del Paso 5 debajo de cada uno, y actualizá la fecha de "Última actualización".
-3. **Anclá `profesia.config.md` en `CLAUDE.md`** (raíz del proyecto): `CLAUDE.md`
-   se carga automático en cada sesión de Claude Code/Cowork, así que sirve como el punto de entrada
-   que le avisa a Claude que este perfil existe, sin tener que duplicar todo el contenido ahí.
+2. **Actualizá `profesia-vault/perfil.md`**: completá el frontmatter (`profesion`, `nombre`,
+   `trabaja_solo_o_equipo`, `dolor_operativo`, `zona_de_genio`) y, en el cuerpo, la sección "##
+   Datos de referencia para los agentes" con lo que te haya dado en el punto 1. Sacá del cuerpo las
+   marcas `_completar_` de lo que sí completaste; dejá tal cual las que sigan pendientes.
+3. **Actualizá las 27 notas de `profesia-vault/agentes/`** (una por una, ya vienen creadas desde
+   que se instaló el plugin): para cada agente, poné `activo: true` en el frontmatter si quedó
+   recomendado/elegido (dejá `activo: false` el resto), y reemplazá el cuerpo de la nota por el
+   caso de uso concreto del Paso 5 (borrá la frase "(one-liner genérico del catálogo...)" una vez
+   que la nota tenga su caso de uso real). Podés revisar/ajustar los `tags` del frontmatter si el
+   caso de uso sugiere alguno más específico, pero no hace falta.
+4. **Anclá el vault en `CLAUDE.md`** (raíz del proyecto): se carga automático en cada
+   sesión de Claude Code/Cowork, así que sirve como el punto de entrada que le avisa a Claude que
+   este perfil existe, sin tener que duplicar todo el contenido ahí.
    - Si `CLAUDE.md` no existe todavía, creálo con el bloque de abajo como único contenido.
    - Si ya existe (por ejemplo porque el proyecto lo usa para otra cosa, convenciones de código,
      etc.), buscá si ya tiene un bloque entre `<!-- profesia:start -->` y `<!-- profesia:end -->`:
      si existe, reemplazá SOLO ese bloque; si no existe, agregalo al final del archivo. Nunca borres
      ni reescribas el resto del contenido de `CLAUDE.md` que no sea ese bloque.
    - El bloque debe decir, en esencia: que este proyecto tiene el plugin Agentes ProfesIA instalado,
-     que antes de responder algo relacionado al trabajo/profesión de la persona hay que leer
-     `profesia.config.md` (perfil completo: profesión, dolor, zona de genio, datos de referencia,
-     agentes activos + casos de uso, bitácora) y `profesia.sops.md` si existe (procesos
-     documentados), y que están disponibles las skills `configuracion-inicial`, `ayuda`,
-     `documentar-procesos` y `segundo-cerebro`. No copies el perfil real de la persona
-     dentro de este bloque — es una referencia, no una copia; el detalle vive solo en
-     `profesia.config.md`.
-4. Cerrá con Paso 8 (abajo).
+     que `profesia-vault/` es la fuente de verdad (antes de responder algo relacionado al
+     trabajo/profesión de la persona hay que leer `profesia-vault/perfil.md` y la nota del agente
+     correspondiente en `profesia-vault/agentes/`), que `profesia.config.md` es un formato legado
+     que ya no se actualiza, y que están disponibles las skills `configuracion-inicial`,
+     `ayuda`, `documentar-procesos` y `segundo-cerebro`. No copies el
+     perfil real de la persona dentro de este bloque — es una referencia, no una copia.
+5. Cerrá con Paso 8 (abajo).
 
 # MODO B · Check-in / bitácora (siguientes veces)
 
@@ -171,13 +184,15 @@ de uso plausible (todos los agentes quedan instalados, no solo los recomendados)
 
 No repreguntes toda la configuración. Simplemente preguntale, en 1-2 líneas de tono cercano:
 "¿En qué estuviste trabajando (hoy o la última vez que hablamos) y con qué tarea querés seguir
-ahora?". Agregá una fila nueva a la tabla de "## Bitácora de trabajo (tu agenda)" en
-`profesia.config.md` con la fecha de hoy, qué avanzó y con qué sigue. Si de paso mencionó un dato
-nuevo (cambió un precio, un horario, empezó a usar un agente que no tenía activo), actualizá también
-esa sección puntual sin rehacer todo el archivo. Si pasó bastante tiempo desde la última actualización
-o cambió de actividad, ofrecele (sin insistir) rehacer el Modo A completo. De paso, si `CLAUDE.md`
+ahora?". Fijate si ya existe una nota `profesia-vault/bitacora/<fecha-de-hoy>.md` (formato
+`YYYY-MM-DD.md`): si existe, actualizala; si no, creala a partir de `profesia-vault/_templates/bitacora.md`
+con el frontmatter (`tipo: bitacora`, `fecha: <hoy>`) y el cuerpo "Avancé: ... / Sigo con: ...". Si
+de paso mencionó un dato nuevo (cambió un precio, un horario, empezó a usar un agente que no tenía
+activo), actualizá también esa nota puntual (`perfil.md` o la nota del agente en `agentes/`) sin
+tocar el resto del vault. Si pasó bastante tiempo desde la última entrada de bitácora o cambió de
+actividad, ofrecele (sin insistir) rehacer el Modo A completo. De paso, si `CLAUDE.md`
 todavía no tiene el bloque `<!-- profesia:start -->` (por ejemplo porque el proyecto es viejo, de antes
-de este cambio), creálo ahora siguiendo las mismas reglas del Paso 6.3 — no hace falta repetir todo
+de este cambio), creálo ahora siguiendo las mismas reglas del Paso 6.4 — no hace falta repetir todo
 el resto del onboarding para eso.
 
 # Cierre (ambos modos)
@@ -187,5 +202,6 @@ el resto del onboarding para eso.
 Resumí en pocas líneas qué quedó activo/actualizado y un ejemplo concreto de cómo invocar a uno de
 los agentes (podés reusar uno de los casos de uso del Paso 5). Mencioná que puede volver a pedir
 "configurar profesia" o simplemente contar en qué está trabajando para que quede en la bitácora. No
-hace falta que le expliques el detalle técnico de `CLAUDE.md` salvo que pregunte — para
-ella alcanza con saber que a partir de ahora Claude ya "sabe" quién es apenas abre el proyecto.
+hace falta que le expliques el detalle técnico del vault ni de `CLAUDE.md` salvo que
+pregunte — para ella alcanza con saber que a partir de ahora Claude ya "sabe" quién es apenas abre
+el proyecto.

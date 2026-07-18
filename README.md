@@ -109,16 +109,16 @@ Abrí el archivo `agentes-profesia.plugin` que te compartieron en el chat y acep
 
 ## Primer uso: configurar qué agentes te sirven
 
-Apenas instales el plugin (o descargues esta carpeta y la pongas en la raíz de tu proyecto), decile a Claude algo como **"configurar profesia"** o **"qué agentes me sirven para mi profesión"**. Esto dispara la skill `configuracion-inicial`, que te va a hacer unas preguntas cortas — arrancando por cuál es tu profesión u oficio, no por si tenés una empresa — y sigue con cómo trabajás (si atendés por WhatsApp, si das turnos, si facturás, si manejás stock, si generás contenido, etc.). Con eso arma/actualiza el archivo **`profesia.config.md`** en la raíz del proyecto, que funciona como tu memoria compartida con los 27 agentes (lo más parecido a un system prompt propio), con:
+Apenas instales el plugin (o descargues esta carpeta y la pongas en la raíz de tu proyecto), decile a Claude algo como **"configurar profesia"** o **"qué agentes me sirven para mi profesión"**. Esto dispara la skill `configuracion-inicial`, que te va a hacer unas preguntas cortas — arrancando por cuál es tu profesión u oficio, no por si tenés una empresa — y sigue con cómo trabajás (si atendés por WhatsApp, si das turnos, si facturás, si manejás stock, si generás contenido, etc.). Con eso arma/actualiza tu **`profesia-vault/`** — el vault de notas atómicas que funciona como tu memoria compartida con los 27 agentes (lo más parecido a un system prompt propio), con:
 
-- tu **dolor operativo** (las tareas repetitivas que más tiempo te quitan o más estrés te generan) y tu **zona de genio** (la tarea en la que más rendís), para que los agentes prioricen sacarte de encima lo primero y te consulten antes de meterse en lo segundo,
-- los datos de referencia que los agentes van a necesitar (horarios, precios, formas de pago, condición fiscal...), así no te los vuelven a preguntar cada vez,
-- una lista de los 27 agentes con un **caso de uso concreto pensado para tu profesión** en cada uno (no un ejemplo genérico), y
-- una **bitácora de trabajo** que funciona como tu agenda: la próxima vez que hables con Claude, te va a preguntar en qué quedaste y con qué querés seguir, y lo va anotando.
+- tu **dolor operativo** (las tareas repetitivas que más tiempo te quitan o más estrés te generan) y tu **zona de genio** (la tarea en la que más rendís), en `perfil.md`, para que los agentes prioricen sacarte de encima lo primero y te consulten antes de meterse en lo segundo,
+- los datos de referencia que los agentes van a necesitar (horarios, precios, formas de pago, condición fiscal...), también en `perfil.md`, así no te los vuelven a preguntar cada vez,
+- una nota por cada uno de los 27 agentes en `agentes/`, marcada `activo: true` si te lo recomendó, con un **caso de uso concreto pensado para tu profesión** (no un ejemplo genérico), y
+- una **bitácora de trabajo** en `bitacora/` (una nota por fecha) que funciona como tu agenda: la próxima vez que hables con Claude, te va a preguntar en qué quedaste y con qué querés seguir, y lo va anotando.
 
 Podés volver a pedir "configurar profesia" cuando quieras: si ya tenés todo configurado, la skill entra en modo check-in rápido (la bitácora) en vez de repreguntarte todo de nuevo.
 
-El onboarding también deja un bloque corto en **`CLAUDE.md`** (en la raíz del proyecto) que apunta a estos archivos. `CLAUDE.md` es el que Claude Code/Cowork carga automáticamente al abrir el proyecto — así, apenas lo abrís, ya sabe que existe tu perfil y va a leer `profesia.config.md` (y `profesia.sops.md` si existe) antes de responderte, sin que tengas que pedirlo. No duplica tu perfil ahí adentro — solo referencia los archivos que sí lo tienen, para no gastar contexto de más en cada sesión. Si el proyecto ya tenía su propio `CLAUDE.md` para otra cosa, el onboarding le agrega este bloque sin tocar el resto.
+El onboarding también deja un bloque corto en **`CLAUDE.md`** (en la raíz del proyecto) que apunta al vault. `CLAUDE.md` es el que Claude Code/Cowork carga automáticamente al abrir el proyecto — así, apenas lo abrís, ya sabe que existe tu perfil y va a leer `profesia-vault/` antes de responderte, sin que tengas que pedirlo. No duplica tu perfil ahí adentro — solo referencia las notas que sí lo tienen, para no gastar contexto de más en cada sesión. Si el proyecto ya tenía su propio `CLAUDE.md` para otra cosa, el onboarding le agrega este bloque sin tocar el resto.
 
 ## Ayuda cuando estás trabado con algo puntual
 
@@ -128,16 +128,18 @@ Si el problema vive en una página web (WhatsApp Web, Instagram, mail), esta ski
 
 ## Cargar tu forma de trabajar (SOPs)
 
-Decile a Claude **"quiero cargar información a mi segundo cerebro"** o **"te voy a enseñar cómo hago esto"** para disparar la skill `documentar-procesos`. Contale el paso a paso de cómo hacés una tarea puntual — **por escrito, por audio o por video**, como te resulte más cómodo — y ella lo convierte en un SOP (Procedimiento Operativo Estándar) guardado en **`profesia.sops.md`**, el documento de respaldo de procesos de tu segundo cerebro.
+Decile a Claude **"quiero cargar información a mi segundo cerebro"** o **"te voy a enseñar cómo hago esto"** para disparar la skill `documentar-procesos`. Contale el paso a paso de cómo hacés una tarea puntual — **por escrito, por audio o por video**, como te resulte más cómodo — y ella lo convierte en un SOP (Procedimiento Operativo Estándar) guardado como una nota nueva en **`profesia-vault/sops/`**, con wikilinks a los agentes relacionados si corresponde.
 
 ## Segundo cerebro: mapa visual de tus agentes
 
 Decile a Claude **"generá mi segundo cerebro"** o **"quiero ver el mapa de mis agentes"** para que arme una página interactiva (`segundo-cerebro/index.html`, se abre con doble click, sin servidor) con un mapa de nodos estilo ProfesIA que muestra:
 
 - los 27 agentes agrupados por equipo, con un núcleo central que se expande al hacer click en cada equipo, y
-- un cluster aparte con la información que ya cargaste en `profesia.config.md` (profesión, datos de referencia, agentes activos), para que veas de un vistazo qué tan completa está tu configuración.
+- un cluster aparte con la información que ya cargaste en tu perfil (profesión, datos de referencia, agentes activos), para que veas de un vistazo qué tan completa está tu configuración.
 
 Dispara la skill `segundo-cerebro`. Podés volver a generarlo cuando quieras (por ejemplo después de correr `configuracion-inicial` de nuevo) para que refleje los cambios.
+
+⚠️ Nota técnica: esta skill todavía lee el formato legado (`profesia.config.md` / `profesia.sops.md`), no `profesia-vault/` — está pendiente de actualizarla para que lea del vault directamente.
 
 ## Cómo probarlo
 
@@ -159,17 +161,24 @@ claude-for-profesIA/
 ├── agents/                      # 27 archivos .md, uno por agente
 ├── skills/
 │   ├── configuracion-inicial/
-│   │   └── SKILL.md             # onboarding + check-in de bitácora
+│   │   └── SKILL.md             # onboarding + check-in de bitácora (escribe en el vault)
 │   ├── ayuda/
 │   │   └── SKILL.md             # triage de problemas puntuales + control de Chrome
 │   ├── documentar-procesos/
-│   │   └── SKILL.md             # carga procesos (texto/audio/video) como SOPs
+│   │   └── SKILL.md             # carga procesos (texto/audio/video) como notas SOP
 │   └── segundo-cerebro/
-│       ├── SKILL.md             # genera el mapa visual de agentes + configuración cargada
+│       ├── SKILL.md             # genera el mapa visual (pendiente: leer del vault)
 │       └── references/          # motor de la visualización (HTML/CSS/JS) + catálogo de agentes
-├── profesia.config.md            # perfil real: profesión, dolor, zona de genio, agentes, bitácora
-├── profesia.sops.md                # procesos documentados (se crea con la skill documentar-procesos)
-├── CLAUDE.md                     # ancla auto-cargada: referencia a los 2 archivos de arriba
+├── profesia-vault/              # FUENTE DE VERDAD: vault de notas atómicas (Obsidian-compatible)
+│   ├── perfil.md               # profesión, dolor operativo, zona de genio, datos de referencia
+│   ├── agentes/                 # 27 notas, una por agente (activo + caso de uso)
+│   ├── sops/                    # procesos documentados
+│   ├── bitacora/                # agenda de trabajo, una nota por fecha
+│   ├── alumnos/ y clases/       # vacías por ahora, listas para cuando haya esa fuente de datos
+│   └── _templates/              # plantilla de cada tipo de nota
+├── profesia.config.md            # ⚠️ legado, ya no se actualiza (formato anterior al vault)
+├── profesia.sops.md                # ⚠️ legado, ya no se actualiza (formato anterior al vault)
+├── CLAUDE.md                     # ancla auto-cargada: referencia al vault
 └── README.md
 ```
 

@@ -1,6 +1,8 @@
 # Configuración de Agentes ProfesIA
 
-> Este archivo lo completa Claude la primera vez que corrés el onboarding del plugin (pedile "configurar profesia" o "qué agentes me sirven" si no arrancó solo). **Funciona como tu memoria compartida con los 27 agentes** — es lo más parecido a un system prompt propio tuyo: todos lo leen antes de responderte, así no repetís lo mismo cada vez y las respuestas vienen ajustadas a tu situación real. La idea de fondo es que ProfesIA sea tu segundo cerebro y tu ayudante del día a día — no solo un ejecutor de tareas sueltas — y que entre vos y los agentes le saquen entre 60% y 70% de la carga operativa a tu semana.
+> ⚠️ **ARCHIVO LEGADO.** Desde la versión 0.3.0 del plugin, la fuente de verdad es `profesia-vault/` (notas atómicas estilo Obsidian: `profesia-vault/perfil.md` + `profesia-vault/agentes/*.md` + `profesia-vault/bitacora/*.md`). Ninguna skill lee ni escribe este archivo — queda acá solo por si tenías datos cargados de una instalación anterior. Si es tu caso, migralos a mano al vault y podés borrar este archivo cuando quieras.
+
+> Antes de esta migración, este archivo funcionaba como memoria compartida con los 27 agentes. La idea de fondo se mantiene igual en el vault: que ProfesIA sea tu segundo cerebro y tu ayudante del día a día — no solo un ejecutor de tareas sueltas — y que entre vos y los agentes le saquen entre 60% y 70% de la carga operativa a tu semana.
 
 **Última actualización:** _(sin configurar todavía)_
 

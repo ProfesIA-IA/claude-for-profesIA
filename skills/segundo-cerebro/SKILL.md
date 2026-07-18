@@ -8,6 +8,11 @@ metadata:
 
 # Segundo Cerebro de Agentes ProfesIA
 
+> ⚠️ **Pendiente de actualizar:** esta skill todavía lee `profesia.config.md` / `profesia.sops.md`
+> (el formato legado), no el vault (`profesia-vault/`) que ahora es la fuente de verdad. Hasta que
+> se actualice para leer del vault, va a quedar desactualizada — usá `profesia-vault/agentes/` y
+> compañía como referencia real mientras tanto.
+
 Generá una página HTML interactiva y navegable (un mapa de nodos tipo "segundo cerebro") del perfil
 de ESTA persona en particular: (1) sus propios agentes activos y cómo los usa (casos de uso
 concretos, no un one-liner genérico), (2) su dolor operativo y su zona de genio, y (3) sus tareas
