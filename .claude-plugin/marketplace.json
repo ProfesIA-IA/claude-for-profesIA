@@ -9,7 +9,7 @@
       "name": "agentes-profesia",
       "source": "./",
       "description": "Staff de 27 agentes de IA de ProfesIA (Tincho, Meli, Ramiro, Rita, Beto y compania) para automatizar comunicacion, administracion, documentos, contenido/ventas y organizacion en pymes, comercios, estudios y consultorios.",
-      "version": "0.3.0"
+      "version": "0.4.0"
     }
   ]
 }

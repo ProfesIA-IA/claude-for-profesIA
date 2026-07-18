@@ -120,11 +120,18 @@ Podés volver a pedir "configurar profesia" cuando quieras: si ya tenés todo co
 
 El onboarding también deja un bloque corto en **`CLAUDE.md`** (en la raíz del proyecto) que apunta al vault. `CLAUDE.md` es el que Claude Code/Cowork carga automáticamente al abrir el proyecto — así, apenas lo abrís, ya sabe que existe tu perfil y va a leer `profesia-vault/` antes de responderte, sin que tengas que pedirlo. No duplica tu perfil ahí adentro — solo referencia las notas que sí lo tienen, para no gastar contexto de más en cada sesión. Si el proyecto ya tenía su propio `CLAUDE.md` para otra cosa, el onboarding le agrega este bloque sin tocar el resto.
 
+## Dos reglas que aplican siempre
+
+Estas dos reglas están escritas en `CLAUDE.md` y se aplican a cualquier tarea con los agentes, no solo dentro de una skill puntual:
+
+- **El navegador se opera con la extensión de Chrome, siempre que se pueda.** Si la tarea implica una página web (WhatsApp Web, Instagram, Gmail, un CRM, un formulario), Claude prioriza usar la extensión de Chrome para hacerla directamente — entrar, leer, completar, navegar — en vez de explicarte los pasos o pedirte que lo hagas vos a mano. Si no la tenés conectada, te lo va a avisar.
+- **La bitácora del vault se actualiza sola, en cada tarea.** No hace falta que corras el check-in a mano para que quede registro: al cerrar cualquier tarea, el agente deja una línea en `profesia-vault/bitacora/<fecha-de-hoy>.md` con qué se resolvió y con qué agente.
+
 ## Ayuda cuando estás trabado con algo puntual
 
 Decile a Claude **"tengo un problema con..."** o **"no sé cómo resolver esto"** para disparar la skill `ayuda`: te hace un par de preguntas para entender el problema y te arma un plan concreto con qué agente(s) usar y en qué orden.
 
-Si el problema vive en una página web (WhatsApp Web, Instagram, mail), esta skill empuja fuerte a que le des **control del navegador (Chrome)** a Claude: que entre, lea lo que te escribieron, lo ordene por urgencia con **Lucho · el Filtro** y te deje los borradores de respuesta listos con **Tincho** o **Ramiro** — vos siempre revisás y mandás, nada se envía solo.
+Si el problema vive en una página web (WhatsApp Web, Instagram, mail), esta skill le da **control del navegador (Chrome)** a Claude por defecto: que entre, lea lo que te escribieron, lo ordene por urgencia con **Lucho · el Filtro** y te deje los borradores de respuesta listos con **Tincho** o **Ramiro** — vos siempre revisás y mandás, nada se envía solo.
 
 ## Cargar tu forma de trabajar (SOPs)
 

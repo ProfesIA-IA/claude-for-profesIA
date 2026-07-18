@@ -3,7 +3,7 @@ name: ayuda
 description: >
   Use this skill when the user is stuck on a specific problem and wants help figuring out how to solve it with their ProfesIA agents — phrases like "tengo un problema con...", "estoy trabado con...", "necesito ayuda con...", "no sé cómo resolver esto", "qué agente uso para...", "cómo hago para que Claude me responda los WhatsApp", "dale acceso a Chrome", or "quiero que revises mis mensajes". This is the go-to skill for turning a messy, unstructured problem into a concrete plan using the 27 agents (and, when it involves a website like WhatsApp Web/Instagram/mail, using Chrome control directly).
 metadata:
-  version: "0.2.0"
+  version: "0.3.0"
 ---
 
 # Ayuda para resolver un problema puntual
@@ -38,12 +38,12 @@ y explicá en lenguaje simple qué agente(s) conviene usar y en qué orden. Si e
 un equipo (ej. "tengo mensajes sin responder Y no sé cuáles son urgentes"), armá la secuencia: primero
 quién clasifica/prioriza, después quién redacta/actúa.
 
-## Paso 3 · Empujar el control de Chrome cuando aplica
+## Paso 3 · El control de Chrome es la prioridad, no una opción más
 
-Este es el paso que más valor agrega y el que más hay que ofrecer explícitamente: si el problema
-vive en una página web (WhatsApp Web, Instagram, Gmail, un CRM, etc.), ofrecele activamente usar el
-control de Chrome/navegador en vez de que la persona copie y pegue mensajes a mano. Ejemplos concretos
-para plantear:
+Regla del plugin (ver `CLAUDE.md`): si el problema vive en una página web (WhatsApp Web,
+Instagram, Gmail, un CRM, etc.), el control de Chrome/navegador es el método por defecto — no algo
+que se ofrece como alternativa, sino lo que usás vos directamente en vez de que la persona copie y
+pegue mensajes a mano. Ejemplos concretos para plantear:
 
 - **"Tengo mensajes de WhatsApp sin responder y no sé por dónde arrancar"** → proponé: dar acceso a
   Chrome, entrar a WhatsApp Web, leer los chats sin responder, usar a **Lucho · el Filtro** para
@@ -67,3 +67,8 @@ la persona la copie y arranque (ej. "Dale acceso a Chrome y decime: 'entrá a mi
 qué tengo sin responder y ordename por urgencia con Lucho'"). Si el problema es recurrente y no está
 reflejado en su dolor operativo dentro de `profesia-vault/perfil.md`, sugerí agregarlo la próxima
 vez que corra `configuracion-inicial` o anotalo vos directamente ahí.
+
+Una vez que el problema quedó resuelto (no solo diagnosticado), aplicá la regla general del plugin:
+dejá una línea en `profesia-vault/bitacora/<fecha-de-hoy>.md` con qué se resolvió y con qué
+agente(s) — creá la nota desde `profesia-vault/_templates/bitacora.md` si todavía no existe la de
+hoy.

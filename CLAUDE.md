@@ -21,6 +21,21 @@ una versión anterior del plugin — ya no se actualizan, ninguna skill les escr
 sirven como referencia de último recurso si alguna vez tuvieron datos y el vault todavía no los
 migró; nunca los trates como la fuente de verdad.
 
+## Cómo ejecutar tareas
+
+Dos reglas que aplican a cualquier tarea con estos agentes, no solo dentro de una skill puntual:
+
+- **Navegador → siempre la extensión de Chrome primero.** Si la tarea implica una página web
+  (WhatsApp Web, Instagram, Gmail, un CRM, un formulario), priorizá usar la extensión de Claude en
+  Chrome (control de navegador) para ejecutarla vos directamente — entrar, leer, completar, navegar
+  — en vez de explicarle los pasos a la persona o pedirle que lo haga a mano. Si no está conectada,
+  avisale y pedile que la habilite antes de seguir.
+- **Memoria → el vault se actualiza solo, en cada tarea.** Al cerrar cualquier tarea (no solo en el
+  check-in de `configuracion-inicial`), dejá una línea en
+  `profesia-vault/bitacora/<fecha-de-hoy>.md` (creála desde `profesia-vault/_templates/bitacora.md`
+  si no existe) con qué se resolvió y con qué agente. Así la bitácora queda al día sesión a sesión
+  sin que la persona tenga que pedirlo.
+
 Skills disponibles: `configuracion-inicial` (setup inicial + check-in de bitácora), `ayuda`
 (resolver un problema puntual, empujando control de Chrome cuando aplica), `documentar-procesos`
 (cargar procesos de trabajo como SOPs), `segundo-cerebro` (generar el mapa visual personal).
