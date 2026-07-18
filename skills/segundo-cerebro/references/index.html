@@ -6,17 +6,12 @@
   <title>Segundo Cerebro</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="loader" id="loader" aria-live="polite">
-    <div class="loader-orb" aria-hidden="true">
-      <span class="loader-orb__ring"></span>
-      <span class="loader-orb__ring"></span>
-      <span class="loader-orb__ring"></span>
-      <span class="loader-orb__core"></span>
-    </div>
+    <div class="loader-dot" aria-hidden="true"></div>
     <p class="loader-title">Cargando segundo cerebro</p>
     <p class="loader-sub" id="loader-sub">Sincronizando áreas de conocimiento…</p>
     <div class="loader-bar" aria-hidden="true"><span id="loader-fill"></span></div>
@@ -24,37 +19,34 @@
 
   <div class="stage" id="stage">
     <div class="atmosphere" aria-hidden="true"></div>
-    <div class="grain" aria-hidden="true"></div>
-    <div class="particles" id="particles" aria-hidden="true"></div>
 
     <header class="topbar">
       <div class="brand">
-        <div class="brand-orb" aria-hidden="true">
-          <span class="brand-orb__ring"></span>
-          <span class="brand-orb__ring"></span>
-          <span class="brand-orb__core"></span>
-        </div>
-        <div>
-          <p class="eyebrow">Asistente de trabajo</p>
-          <h1>Segundo Cerebro</h1>
-        </div>
+        <span class="brand-dot" aria-hidden="true"></span>
+        <h1>Segundo Cerebro</h1>
       </div>
       <div class="topbar-meta">
         <span id="stat-clusters">0 áreas</span>
         <span class="dot" aria-hidden="true"></span>
-        <span id="stat-nodes">0 células</span>
+        <span id="stat-nodes">0 notas</span>
       </div>
     </header>
 
-    <canvas id="brain" aria-label="Mapa neuronal del segundo cerebro"></canvas>
+    <div class="search-wrap">
+      <input class="search-input" id="search" type="text" placeholder="Buscar en el mapa…" autocomplete="off" />
+    </div>
+
+    <canvas id="brain" aria-label="Mapa del segundo cerebro"></canvas>
 
     <aside class="tour-banner" id="tour-banner" hidden>
       <p class="tour-kicker">Recorrido</p>
       <p class="tour-label" id="tour-label"></p>
     </aside>
 
+    <aside class="legend" id="legend" aria-label="Áreas del mapa"></aside>
+
     <aside class="hint" id="hint">
-      <p>Click en un cluster para expandir · Arrastrá para mover · Scroll para zoom</p>
+      <p>Pasá el mouse para resaltar conexiones · Arrastrá para mover · Scroll para zoom</p>
     </aside>
 
     <aside class="panel" id="panel" hidden>
@@ -63,12 +55,11 @@
       <h2 id="panel-title"></h2>
       <p id="panel-detail"></p>
       <div class="panel-meta" id="panel-meta"></div>
-      <button class="panel-action" id="panel-action" type="button" hidden>Colapsar área</button>
     </aside>
 
     <div class="controls">
-      <button class="tour-btn" id="tour" type="button">Recorrer cerebro</button>
-      <button class="reset" id="reset" type="button" title="Volver a la vista general">Vista general</button>
+      <button class="btn" id="tour" type="button">Recorrer</button>
+      <button class="btn reset" id="reset" type="button" title="Volver a la vista general">Vista general</button>
     </div>
   </div>
 

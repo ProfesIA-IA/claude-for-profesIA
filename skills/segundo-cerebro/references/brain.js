@@ -1,57 +1,35 @@
 /**
- * Segundo Cerebro — interactive knowledge map
+ * Segundo Cerebro — graph view estilo Obsidian
  *
- * Visual language: Sistema-ATS (CSS particles, dark blooms, orange/navy glow).
- * Graph layer: Canvas 2D force simulation (no Three/D3) so clusters can
- * expand/collapse with the same premium motion feel.
+ * Toda la red se dibuja desde el arranque (nada queda oculto detrás de un
+ * click): fondo plano oscuro, nodos chatos sin glow, tamaño según cantidad
+ * de conexiones, líneas finas. Al pasar el mouse (o seleccionar / buscar /
+ * tocar la leyenda) se resalta el nodo + sus vecinos directos y se atenúa
+ * el resto — el mismo comportamiento que el graph view real de Obsidian.
  *
- * Data: window.__BRAIN_DATA__ (data.js) — works with file://.
- * Optional: fetch('./data/brain.json') when served over http.
+ * Data: window.__BRAIN_DATA__ (data.js) — funciona directo con file://.
+ * Alternativa: fetch('./data/brain.json') si se sirve por http.
  */
 
 const DATA_URL = "./data/brain.json";
 
 const COLORS = {
-  orange: "#EF7A1E",
-  orangeGlow: "rgba(239,122,30,",
-  navy: "#203E7F",
-  navyGlow: "rgba(58,110,210,",
-  line: "rgba(201,206,218,",
-  core: "#F6A862",
-  white: "#FFFFFF",
+  accent: [239, 122, 30],
+  edge: "rgba(255,255,255,",
+  edgeDim: "rgba(255,255,255,",
 };
 
 const CLUSTER_PALETTE = [
   [239, 122, 30],
-  [58, 110, 210],
+  [90, 140, 240],
   [111, 134, 184],
   [246, 168, 98],
-  [46, 158, 91],
-  [100, 149, 237],
+  [86, 178, 121],
+  [120, 159, 237],
   [232, 160, 60],
-  [80, 120, 200],
-  [180, 110, 60],
+  [130, 150, 210],
+  [200, 130, 80],
 ];
-
-/* ---------------- ATS-style floating particles ---------------- */
-
-function createParticles(count = 28) {
-  const container = document.getElementById("particles");
-  container.innerHTML = "";
-  for (let i = 0; i < count; i++) {
-    const p = document.createElement("div");
-    p.className = "particle";
-    p.style.left = `${Math.random() * 100}%`;
-    p.style.animationDuration = `${4 + Math.random() * 6}s`;
-    p.style.animationDelay = `${Math.random() * 5}s`;
-    const size = 2 + Math.random() * 4;
-    p.style.width = p.style.height = `${size}px`;
-    if (Math.random() > 0.5) {
-      p.style.background = "rgba(32,62,127,.5)";
-    }
-    container.appendChild(p);
-  }
-}
 
 /* ---------------- Data adapter (swap for real sources) ---------------- */
 
@@ -65,33 +43,30 @@ function normalizeBrainData(raw) {
   }
   return {
     meta: raw.meta || {},
-    clusters: raw.clusters
-      .filter((c) => c.id !== "marketing-contenido")
-      .map((c, i) => ({
-        id: c.id || `cluster-${i}`,
-        nombre: c.nombre || c.name || `Área ${i + 1}`,
-        descripcion: c.descripcion || c.description || "",
-        nodos: (c.nodos || c.nodes || []).map((n, j) => ({
-          id: n.id || `${c.id || i}-nodo-${j}`,
-          titulo: n.titulo || n.title || `Nodo ${j + 1}`,
-          detalle: n.detalle || n.detail || n.description || "",
-        })),
+    clusters: raw.clusters.map((c, i) => ({
+      id: c.id || `cluster-${i}`,
+      nombre: c.nombre || c.name || `Área ${i + 1}`,
+      descripcion: c.descripcion || c.description || "",
+      nodos: (c.nodos || c.nodes || []).map((n, j) => ({
+        id: n.id || `${c.id || i}-nodo-${j}`,
+        titulo: n.titulo || n.title || `Nodo ${j + 1}`,
+        detalle: n.detalle || n.detail || n.description || "",
       })),
+    })),
   };
 }
 
 async function loadBrainData() {
-  // Prefers embedded data so file:// works without a local server.
+  // Prefiere la data embebida para que funcione con file:// sin servidor.
   if (window.__BRAIN_DATA__) {
     return normalizeBrainData(window.__BRAIN_DATA__);
   }
-  // Future: const res = await fetch('/api/assistant/activity');
   const res = await fetch(DATA_URL);
   if (!res.ok) throw new Error(`Failed to load ${DATA_URL}: ${res.status}`);
   return normalizeBrainData(await res.json());
 }
 
-/* ---------------- Force simulation ---------------- */
+/* ---------------- Force simulation (grafo tipo Obsidian) ---------------- */
 
 class ForceBrain {
   constructor(canvas, data) {
@@ -100,10 +75,14 @@ class ForceBrain {
     this.data = data;
     this.nodes = [];
     this.links = [];
-    this.expanded = new Set();
+    this.adjacency = new Map();
     this.hovered = null;
     this.selected = null;
     this.dragNode = null;
+    this.searchQuery = "";
+    this.activeClusterId = null;
+    this.lockedClusterId = null;
+    this.focusIds = null;
 
     this.camera = { x: 0, y: 0, scale: 1, targetScale: 1, tx: 0, ty: 0 };
     this.pointer = { x: 0, y: 0, down: false, moved: false, lastX: 0, lastY: 0 };
@@ -113,9 +92,9 @@ class ForceBrain {
     this.touring = false;
     this.tourTimer = null;
     this.tourIndex = 0;
-    this.tourAbort = false;
 
     this._buildGraph();
+    this._buildLegend();
     this._bindUI();
     this._bindPointer();
     this._resize();
@@ -123,10 +102,12 @@ class ForceBrain {
     requestAnimationFrame((t) => this._loop(t));
   }
 
+  /* ---- Grafo: todo visible desde el arranque, tamaño = cantidad de links ---- */
+
   _buildGraph() {
     const clusters = this.data.clusters;
     const n = clusters.length;
-    const radius = Math.min(260, 90 + n * 22);
+    const radius = Math.min(240, 100 + n * 20);
 
     this.nodes = [];
     this.links = [];
@@ -143,13 +124,10 @@ class ForceBrain {
       vy: 0,
       fx: 0,
       fy: 0,
-      r: 16,
+      r: 15,
       mass: 3,
-      pulse: 0,
-      visible: true,
-      alpha: 1,
-      targetAlpha: 1,
-      rgb: [239, 122, 30],
+      dispAlpha: 1,
+      rgb: COLORS.accent,
     };
     this.nodes.push(core);
 
@@ -167,24 +145,18 @@ class ForceBrain {
         y: Math.sin(angle) * radius,
         vx: 0,
         vy: 0,
-        fx: Math.cos(angle) * radius,
-        fy: Math.sin(angle) * radius,
-        homeAngle: angle,
-        homeRadius: radius,
-        r: 11 + Math.min(6, c.nodos.length * 0.4),
+        fx: null,
+        fy: null,
+        r: Math.max(9, Math.min(22, 9 + Math.sqrt(c.nodos.length) * 3)),
         mass: 2,
-        pulse: Math.random() * Math.PI * 2,
-        visible: true,
-        alpha: 1,
-        targetAlpha: 1,
+        dispAlpha: 1,
         rgb,
-        expanded: false,
       };
       this.nodes.push(hub);
-      this.links.push({ source: core, target: hub, strength: 0.02, kind: "spine" });
+      this.links.push({ source: core, target: hub, strength: 0.02, kind: "spine", ideal: 150 });
 
       c.nodos.forEach((nodo, j) => {
-        const a = angle + ((j - (c.nodos.length - 1) / 2) * 0.28) / Math.max(1, c.nodos.length * 0.15);
+        const a = angle + ((j - (c.nodos.length - 1) / 2) * 0.32) / Math.max(1, c.nodos.length * 0.18);
         const child = {
           id: nodo.id,
           type: "leaf",
@@ -192,41 +164,30 @@ class ForceBrain {
           detail: nodo.detalle,
           clusterId: c.id,
           parentId: c.id,
-          x: hub.x + Math.cos(a) * 40,
-          y: hub.y + Math.sin(a) * 40,
+          x: hub.x + Math.cos(a) * 42,
+          y: hub.y + Math.sin(a) * 42,
           vx: 0,
           vy: 0,
           fx: null,
           fy: null,
-          r: 4.5,
+          r: 4.2,
           mass: 0.6,
-          pulse: Math.random() * Math.PI * 2,
-          visible: false,
-          alpha: 0,
-          targetAlpha: 0,
+          dispAlpha: 1,
           rgb,
         };
         this.nodes.push(child);
-        this.links.push({
-          source: hub,
-          target: child,
-          strength: 0.08,
-          kind: "branch",
-          clusterId: c.id,
-        });
+        this.links.push({ source: hub, target: child, strength: 0.06, kind: "branch", ideal: 46, clusterId: c.id });
       });
     });
 
-    // Soft cross-links between nearby hubs (constellation feel)
-    const hubs = this.nodes.filter((n) => n.type === "hub");
-    for (let i = 0; i < hubs.length; i++) {
-      const a = hubs[i];
-      const b = hubs[(i + 1) % hubs.length];
-      this.links.push({ source: a, target: b, strength: 0.004, kind: "ring" });
-      if (i % 2 === 0) {
-        const c = hubs[(i + 2) % hubs.length];
-        this.links.push({ source: a, target: c, strength: 0.002, kind: "ring" });
-      }
+    // adjacency (para el resaltado de vecinos al hacer hover/click)
+    for (const link of this.links) {
+      const a = link.source.id;
+      const b = link.target.id;
+      if (!this.adjacency.has(a)) this.adjacency.set(a, new Set());
+      if (!this.adjacency.has(b)) this.adjacency.set(b, new Set());
+      this.adjacency.get(a).add(b);
+      this.adjacency.get(b).add(a);
     }
 
     this._updateStats();
@@ -236,8 +197,62 @@ class ForceBrain {
     const clusters = this.data.clusters.length;
     const nodes = this.data.clusters.reduce((s, c) => s + c.nodos.length, 0);
     document.getElementById("stat-clusters").textContent = `${clusters} áreas`;
-    document.getElementById("stat-nodes").textContent = `${nodes} células`;
+    document.getElementById("stat-nodes").textContent = `${nodes} notas`;
   }
+
+  /* ---- Leyenda (equivalente a los "groups" de Obsidian) ---- */
+
+  _buildLegend() {
+    const legend = document.getElementById("legend");
+    legend.innerHTML = "";
+    this.data.clusters.forEach((c, i) => {
+      const rgb = CLUSTER_PALETTE[i % CLUSTER_PALETTE.length];
+      const item = document.createElement("div");
+      item.className = "legend-item";
+      item.dataset.clusterId = c.id;
+      item.innerHTML = `<span class="legend-swatch" style="background: rgb(${rgb.join(",")})"></span><span>${this._escapeHtml(c.nombre)}</span>`;
+
+      item.addEventListener("mouseenter", () => {
+        if (!this.lockedClusterId) {
+          this.activeClusterId = c.id;
+          this._updateFocus();
+        }
+      });
+      item.addEventListener("mouseleave", () => {
+        if (!this.lockedClusterId) {
+          this.activeClusterId = null;
+          this._updateFocus();
+        }
+      });
+      item.addEventListener("click", () => {
+        if (this.lockedClusterId === c.id) {
+          this.lockedClusterId = null;
+          this.activeClusterId = null;
+        } else {
+          this.lockedClusterId = c.id;
+          this.activeClusterId = c.id;
+        }
+        this._renderLegendActiveState();
+        this._updateFocus();
+      });
+
+      legend.appendChild(item);
+    });
+  }
+
+  _renderLegendActiveState() {
+    document.querySelectorAll(".legend-item").forEach((el) => {
+      el.classList.toggle("is-active", el.dataset.clusterId === this.lockedClusterId);
+    });
+  }
+
+  _escapeHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str || "";
+    return div.innerHTML;
+  }
+
+  /* ---- UI ---- */
 
   _bindUI() {
     this.panel = document.getElementById("panel");
@@ -245,19 +260,17 @@ class ForceBrain {
     this.panelTitle = document.getElementById("panel-title");
     this.panelDetail = document.getElementById("panel-detail");
     this.panelMeta = document.getElementById("panel-meta");
-    this.panelAction = document.getElementById("panel-action");
     this.resetBtn = document.getElementById("reset");
     this.hint = document.getElementById("hint");
     this.tourBtn = document.getElementById("tour");
     this.tourBanner = document.getElementById("tour-banner");
     this.tourLabel = document.getElementById("tour-label");
+    this.searchInput = document.getElementById("search");
 
-    document.getElementById("panel-close").addEventListener("click", () => this._closePanel());
-    this.panelAction.addEventListener("click", () => {
-      if (this.selected?.type === "hub" && this.expanded.has(this.selected.id)) {
-        this._collapse(this.selected.id);
-        this._closePanel();
-      }
+    document.getElementById("panel-close").addEventListener("click", () => {
+      this.selected = null;
+      this._closePanel();
+      this._updateFocus();
     });
     this.resetBtn.addEventListener("click", () => {
       this._stopTour(false);
@@ -267,6 +280,31 @@ class ForceBrain {
       if (this.touring) this._stopTour(true);
       else this.startTour();
     });
+    this.searchInput.addEventListener("input", (e) => {
+      if (this.touring) this._stopTour(true);
+      this.searchQuery = e.target.value.trim().toLowerCase();
+      this._updateFocus();
+    });
+  }
+
+  /* ---- Resaltado: nodo + vecinos directos, atenuar el resto ---- */
+
+  _updateFocus() {
+    let ids = null;
+    if (this.hovered) {
+      ids = new Set([this.hovered.id, ...(this.adjacency.get(this.hovered.id) || [])]);
+    } else if (this.selected) {
+      ids = new Set([this.selected.id, ...(this.adjacency.get(this.selected.id) || [])]);
+    } else if (this.activeClusterId) {
+      ids = new Set(
+        this.nodes.filter((n) => n.id === "core" || n.clusterId === this.activeClusterId).map((n) => n.id)
+      );
+    } else if (this.searchQuery) {
+      ids = new Set(
+        this.nodes.filter((n) => n.label && n.label.toLowerCase().includes(this.searchQuery)).map((n) => n.id)
+      );
+    }
+    this.focusIds = ids;
   }
 
   _bindPointer() {
@@ -289,7 +327,7 @@ class ForceBrain {
       this.pointer.lastY = p.y;
       const world = this._screenToWorld(p.x, p.y);
       const hit = this._hitTest(world.x, world.y);
-      if (hit) {
+      if (hit && hit.type !== "core") {
         this.dragNode = hit;
         hit.fx = hit.x;
         hit.fy = hit.y;
@@ -323,7 +361,10 @@ class ForceBrain {
         }
       } else {
         const hit = this._hitTest(world.x, world.y);
-        this.hovered = hit;
+        if (hit !== this.hovered) {
+          this.hovered = hit;
+          this._updateFocus();
+        }
         c.classList.toggle("is-hover-node", !!hit);
         if (hit) {
           this._showHoverPanel(hit);
@@ -335,29 +376,21 @@ class ForceBrain {
 
     c.addEventListener("pointerleave", () => {
       this.hovered = null;
+      this._updateFocus();
       c.classList.remove("is-hover-node");
       if (!this.selected) this._closePanel();
     });
 
     const end = (e) => {
-      if (this.dragNode && this.dragNode.type !== "core" && this.dragNode.type !== "hub") {
+      if (this.dragNode) {
         this.dragNode.fx = null;
         this.dragNode.fy = null;
-      } else if (this.dragNode?.type === "hub" && !this.expanded.has(this.dragNode.id)) {
-        // keep soft home bias via homeAngle; clear hard pin after drag
-        this.dragNode.fx = null;
-        this.dragNode.fy = null;
-      } else if (this.dragNode?.type === "core") {
-        this.dragNode.fx = 0;
-        this.dragNode.fy = 0;
       }
       this.dragNode = null;
       this.pointer.down = false;
       this.canvas.classList.remove("is-dragging");
 
       if (!this.pointer.moved) {
-        const p = pos(e.changedTouches ? e : e);
-        // for pointerup, use last known or event
         const clientX = e.clientX ?? this.pointer.x;
         const clientY = e.clientY ?? this.pointer.y;
         const rect = this.canvas.getBoundingClientRect();
@@ -366,7 +399,11 @@ class ForceBrain {
         const world = this._screenToWorld(sx, sy);
         const hit = this._hitTest(world.x, world.y);
         if (hit) this._onClickNode(hit);
-        else this._closePanel();
+        else {
+          this.selected = null;
+          this._closePanel();
+          this._updateFocus();
+        }
       }
     };
 
@@ -379,7 +416,7 @@ class ForceBrain {
         e.preventDefault();
         if (this.touring) this._stopTour(true);
         const factor = Math.exp(-e.deltaY * 0.0012);
-        this.camera.targetScale = Math.min(2.8, Math.max(0.45, this.camera.targetScale * factor));
+        this.camera.targetScale = Math.min(2.8, Math.max(0.4, this.camera.targetScale * factor));
         this._showReset();
         this._hideHint();
       },
@@ -393,92 +430,69 @@ class ForceBrain {
     this._hideHint();
     this._showReset();
     this.touring = true;
-    this.tourAbort = false;
     this.tourIndex = 0;
+    this.selected = null;
+    this._closePanel();
     this.tourBtn.classList.add("is-active");
-    this.tourBtn.textContent = "Detener recorrido";
+    this.tourBtn.textContent = "Detener";
     this.tourBanner.hidden = false;
     requestAnimationFrame(() => this.tourBanner.classList.add("is-open"));
 
-    // Overview beat first
-    for (const id of [...this.expanded]) this._collapse(id);
-    this.camera.targetScale = 0.85;
+    this.activeClusterId = null;
+    this._updateFocus();
+    this.camera.targetScale = 0.9;
     this.camera.tx = 0;
     this.camera.ty = 0;
-    this.selected = this.nodes.find((n) => n.type === "core");
-    this._showPanel(this.selected);
-    this.tourLabel.textContent = "Vista general del conocimiento";
+    this.tourLabel.textContent = "Vista general del mapa";
 
     clearTimeout(this.tourTimer);
-    this.tourTimer = setTimeout(() => this._tourNextHub(), 1800);
+    this.tourTimer = setTimeout(() => this._tourNext(), 1600);
   }
 
-  _tourNextHub() {
-    if (!this.touring || this.tourAbort) return;
+  _tourNext() {
+    if (!this.touring) return;
     const hubs = this.nodes.filter((n) => n.type === "hub");
     if (this.tourIndex >= hubs.length) {
       this._tourFinale();
       return;
     }
-
     const hub = hubs[this.tourIndex];
     this.tourIndex += 1;
 
-    for (const id of [...this.expanded]) {
-      if (id !== hub.id) this._collapse(id);
-    }
-
-    this._expand(hub.id);
-    this._focusOn(hub, 1.65);
-    this.selected = hub;
-    this.hovered = hub;
-    this._showPanel(hub, true);
+    this.activeClusterId = hub.id;
+    this._updateFocus();
+    this._focusOn(hub, 1.4);
     this.tourLabel.textContent = hub.label;
 
     clearTimeout(this.tourTimer);
-    this.tourTimer = setTimeout(() => {
-      if (!this.touring) return;
-      // Peek a leaf inside the cluster
-      const leaves = this.nodes.filter((n) => n.parentId === hub.id && n.visible);
-      const leaf = leaves[Math.min(1, leaves.length - 1)] || leaves[0];
-      if (leaf) {
-        this._focusOn(leaf, 1.9);
-        this.selected = leaf;
-        this.hovered = leaf;
-        this._showPanel(leaf);
-        this.tourLabel.textContent = leaf.label;
-      }
-      this.tourTimer = setTimeout(() => this._tourNextHub(), 2200);
-    }, 2600);
+    this.tourTimer = setTimeout(() => this._tourNext(), 2200);
   }
 
   _tourFinale() {
     if (!this.touring) return;
-    for (const id of [...this.expanded]) this._collapse(id);
+    this.activeClusterId = null;
+    this._updateFocus();
     this.camera.targetScale = 1;
     this.camera.tx = 0;
     this.camera.ty = 0;
-    this.hovered = null;
     this.tourLabel.textContent = "Recorrido completo";
-    const core = this.nodes.find((n) => n.type === "core");
-    this.selected = core;
-    this._showPanel(core);
 
     clearTimeout(this.tourTimer);
-    this.tourTimer = setTimeout(() => this._stopTour(false), 1600);
+    this.tourTimer = setTimeout(() => this._stopTour(false), 1400);
   }
 
   _stopTour(userStopped) {
     this.touring = false;
-    this.tourAbort = true;
     clearTimeout(this.tourTimer);
     this.tourBtn.classList.remove("is-active");
-    this.tourBtn.textContent = "Recorrer cerebro";
+    this.tourBtn.textContent = "Recorrer";
     this.tourBanner.classList.remove("is-open");
     setTimeout(() => {
       if (!this.touring) this.tourBanner.hidden = true;
-    }, 400);
+    }, 350);
     if (userStopped) {
+      this.activeClusterId = null;
+      this._updateFocus();
       this.tourLabel.textContent = "";
     }
   }
@@ -494,116 +508,50 @@ class ForceBrain {
   }
 
   _resetView() {
-    for (const id of [...this.expanded]) this._collapse(id);
     this.camera.targetScale = 1;
     this.camera.tx = 0;
     this.camera.ty = 0;
     this.resetBtn.classList.remove("is-visible");
+    this.selected = null;
+    this.hovered = null;
+    this.activeClusterId = null;
+    this.lockedClusterId = null;
+    this.searchQuery = "";
+    this.searchInput.value = "";
+    this._renderLegendActiveState();
+    this._updateFocus();
     this._closePanel();
-    // re-home hubs
-    for (const n of this.nodes) {
-      if (n.type === "hub") {
-        n.fx = Math.cos(n.homeAngle) * n.homeRadius;
-        n.fy = Math.sin(n.homeAngle) * n.homeRadius;
-        setTimeout(() => {
-          if (!this.expanded.has(n.id)) {
-            n.fx = null;
-            n.fy = null;
-          }
-        }, 800);
-      }
-    }
   }
 
   _onClickNode(node) {
     this._hideHint();
     this._showReset();
-    this.selected = node;
-
-    if (node.type === "hub") {
-      if (this.expanded.has(node.id)) {
-        this._collapse(node.id);
-        this._showPanel(node);
-      } else {
-        // collapse others for focus (zoom-into-cluster feel)
-        for (const id of [...this.expanded]) {
-          if (id !== node.id) this._collapse(id);
-        }
-        this._expand(node.id);
-        this._focusOn(node, 1.55);
-        this._showPanel(node, true);
-      }
+    if (this.selected === node) {
+      this.selected = null;
+      this._closePanel();
     } else {
+      this.selected = node;
       this._showPanel(node);
-      if (node.type === "leaf") {
-        const hub = this.nodes.find((n) => n.id === node.clusterId);
-        if (hub) this._focusOn(hub, Math.max(this.camera.targetScale, 1.45));
-      }
     }
-  }
-
-  _expand(clusterId) {
-    this.expanded.add(clusterId);
-    const hub = this.nodes.find((n) => n.id === clusterId);
-    if (hub) {
-      hub.expanded = true;
-      hub.fx = hub.x;
-      hub.fy = hub.y;
-    }
-    const leaves = this.nodes.filter((n) => n.parentId === clusterId);
-    leaves.forEach((leaf, i) => {
-      leaf.visible = true;
-      leaf.targetAlpha = 1;
-      const angle = (hub?.homeAngle || 0) + ((i - (leaves.length - 1) / 2) * 0.45);
-      const dist = 55 + leaves.length * 4;
-      leaf.x = (hub?.x || 0) + Math.cos(angle) * (dist * 0.35);
-      leaf.y = (hub?.y || 0) + Math.sin(angle) * (dist * 0.35);
-      leaf.vx = Math.cos(angle) * 2;
-      leaf.vy = Math.sin(angle) * 2;
-    });
-  }
-
-  _collapse(clusterId) {
-    this.expanded.delete(clusterId);
-    const hub = this.nodes.find((n) => n.id === clusterId);
-    if (hub) {
-      hub.expanded = false;
-      hub.fx = null;
-      hub.fy = null;
-    }
-    for (const leaf of this.nodes.filter((n) => n.parentId === clusterId)) {
-      leaf.targetAlpha = 0;
-      // hide after fade
-      setTimeout(() => {
-        if (leaf.targetAlpha === 0) leaf.visible = false;
-      }, 420);
-    }
-  }
-
-  _focusOn(node, scale = 1.5) {
-    this.camera.targetScale = scale;
-    this.camera.tx = -node.x;
-    this.camera.ty = -node.y;
+    this._updateFocus();
   }
 
   _showHoverPanel(node) {
-    // Only auto-open on hover if nothing selected, or same cluster browsing
     if (this.selected && this.selected.id === node.id) return;
     if (!this.pointer.down && !this.selected) {
-      // light preview via panel without locking selection
-      this._fillPanel(node, false);
+      this._fillPanel(node);
       this.panel.hidden = false;
       requestAnimationFrame(() => this.panel.classList.add("is-open"));
     }
   }
 
-  _showPanel(node, showCollapse = false) {
-    this._fillPanel(node, showCollapse || (node.type === "hub" && this.expanded.has(node.id)));
+  _showPanel(node) {
+    this._fillPanel(node);
     this.panel.hidden = false;
     requestAnimationFrame(() => this.panel.classList.add("is-open"));
   }
 
-  _fillPanel(node, showCollapse) {
+  _fillPanel(node) {
     if (node.type === "core") {
       this.panelKicker.textContent = "Núcleo";
       this.panelTitle.textContent = "Segundo Cerebro";
@@ -613,23 +561,21 @@ class ForceBrain {
       this.panelKicker.textContent = "Área de conocimiento";
       this.panelTitle.textContent = node.label;
       this.panelDetail.textContent = node.detail;
-      this.panelMeta.textContent = `${node.count} células · click para ${this.expanded.has(node.id) ? "colapsar" : "expandir"}`;
+      this.panelMeta.textContent = `${node.count} notas conectadas`;
     } else {
       const hub = this.data.clusters.find((c) => c.id === node.clusterId);
-      this.panelKicker.textContent = hub?.nombre || "Célula";
+      this.panelKicker.textContent = hub?.nombre || "Nota";
       this.panelTitle.textContent = node.label;
       this.panelDetail.textContent = node.detail;
       this.panelMeta.textContent = "Pieza de trabajo del asistente";
     }
-    this.panelAction.hidden = !showCollapse;
   }
 
   _closePanel() {
-    this.selected = null;
     this.panel.classList.remove("is-open");
     setTimeout(() => {
       if (!this.panel.classList.contains("is-open")) this.panel.hidden = true;
-    }, 400);
+    }, 350);
   }
 
   _screenToWorld(sx, sy) {
@@ -645,10 +591,8 @@ class ForceBrain {
     let best = null;
     let bestD = Infinity;
     for (const n of this.nodes) {
-      if (!n.visible && n.type === "leaf") continue;
-      if (n.alpha < 0.2) continue;
       const d = Math.hypot(n.x - wx, n.y - wy);
-      const pad = n.type === "hub" ? n.r + 10 : n.r + 6;
+      const pad = n.type === "hub" || n.type === "core" ? n.r + 8 : n.r + 5;
       if (d < pad && d < bestD) {
         best = n;
         bestD = d;
@@ -664,26 +608,19 @@ class ForceBrain {
     this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
   }
 
+  /* ---- Simulación: spring links + repulsión + centrado suave (estilo d3-force) ---- */
+
   _tick(dt) {
     const nodes = this.nodes;
     const links = this.links;
 
-    // spring links
     for (const link of links) {
       const a = link.source;
       const b = link.target;
-      if (link.kind === "branch" && !this.expanded.has(link.clusterId)) continue;
-      if ((a.type === "leaf" && a.alpha < 0.05) || (b.type === "leaf" && b.alpha < 0.05)) continue;
-
       const dx = b.x - a.x;
       const dy = b.y - a.y;
       const dist = Math.hypot(dx, dy) || 0.01;
-      let ideal = 90;
-      if (link.kind === "branch") ideal = 70;
-      if (link.kind === "ring") ideal = 200;
-      if (link.kind === "spine") ideal = 160;
-
-      const force = (dist - ideal) * link.strength;
+      const force = (dist - link.ideal) * link.strength;
       const fx = (dx / dist) * force;
       const fy = (dy / dist) * force;
       if (a.fx == null) {
@@ -696,21 +633,18 @@ class ForceBrain {
       }
     }
 
-    // repulsion
     for (let i = 0; i < nodes.length; i++) {
       const a = nodes[i];
-      if (a.type === "leaf" && !a.visible) continue;
       for (let j = i + 1; j < nodes.length; j++) {
         const b = nodes[j];
-        if (b.type === "leaf" && !b.visible) continue;
         const dx = b.x - a.x;
         const dy = b.y - a.y;
         let dist2 = dx * dx + dy * dy;
         if (dist2 < 1) dist2 = 1;
         const dist = Math.sqrt(dist2);
-        let charge = 1800;
-        if (a.type === "leaf" || b.type === "leaf") charge = 400;
-        if (a.type === "hub" && b.type === "hub") charge = 4200;
+        let charge = 900;
+        if (a.type === "leaf" || b.type === "leaf") charge = 260;
+        if (a.type === "hub" && b.type === "hub") charge = 3200;
         const force = charge / dist2;
         const fx = (dx / dist) * force;
         const fy = (dy / dist) * force;
@@ -725,40 +659,20 @@ class ForceBrain {
       }
     }
 
-    // gentle mouse wake
-    const world = this._screenToWorld(this.pointer.x, this.pointer.y);
+    // centrado suave (evita que el grafo se vaya a la deriva)
     for (const n of nodes) {
-      if (n.type === "leaf" && !n.visible) continue;
       if (n.fx != null) continue;
-      const dx = n.x - world.x;
-      const dy = n.y - world.y;
-      const d2 = dx * dx + dy * dy;
-      if (d2 < 120 * 120 && d2 > 1) {
-        const d = Math.sqrt(d2);
-        const push = (1 - d / 120) * 0.35;
-        n.vx += (dx / d) * push;
-        n.vy += (dy / d) * push;
-      }
+      n.vx -= n.x * 0.0018;
+      n.vy -= n.y * 0.0018;
     }
 
-    // hub home bias when collapsed
-    for (const n of nodes) {
-      if (n.type === "hub" && !n.expanded && n.fx == null) {
-        const hx = Math.cos(n.homeAngle) * n.homeRadius;
-        const hy = Math.sin(n.homeAngle) * n.homeRadius;
-        n.vx += (hx - n.x) * 0.01;
-        n.vy += (hy - n.y) * 0.01;
-      }
-      if (n.type === "core") {
-        n.fx = 0;
-        n.fy = 0;
-      }
-    }
+    // el núcleo queda fijo como ancla del mapa
+    const core = nodes[0];
+    core.fx = 0;
+    core.fy = 0;
 
-    // integrate
-    const damp = Math.pow(0.86, dt * 60);
+    const damp = Math.pow(0.85, dt * 60);
     for (const n of nodes) {
-      if (n.type === "leaf" && !n.visible && n.alpha <= 0) continue;
       if (n.fx != null) {
         n.x = n.fx;
         n.y = n.fy;
@@ -770,16 +684,22 @@ class ForceBrain {
         n.x += n.vx * dt * 60;
         n.y += n.vy * dt * 60;
       }
-      // alpha lerp (ATS ease feel)
-      n.alpha += (n.targetAlpha - n.alpha) * Math.min(1, dt * 6);
-      n.pulse += dt * (n.type === "core" ? 2.2 : 1.4);
+      const target = !this.focusIds ? 1 : this.focusIds.has(n.id) ? 1 : 0.15;
+      n.dispAlpha += (target - n.dispAlpha) * Math.min(1, dt * 8);
     }
 
-    // camera ease
     this.camera.scale += (this.camera.targetScale - this.camera.scale) * Math.min(1, dt * 5);
     this.camera.x += (this.camera.tx - this.camera.x) * Math.min(1, dt * 4);
     this.camera.y += (this.camera.ty - this.camera.y) * Math.min(1, dt * 4);
   }
+
+  _focusOn(node, scale = 1.4) {
+    this.camera.targetScale = scale;
+    this.camera.tx = -node.x;
+    this.camera.ty = -node.y;
+  }
+
+  /* ---- Dibujo: círculos chatos, líneas finas, sin glow ---- */
 
   _draw() {
     const ctx = this.ctx;
@@ -792,114 +712,61 @@ class ForceBrain {
     ctx.scale(this.camera.scale, this.camera.scale);
     ctx.translate(this.camera.x, this.camera.y);
 
-    // links
+    // líneas
     for (const link of this.links) {
       const a = link.source;
       const b = link.target;
-      if (link.kind === "branch" && !this.expanded.has(link.clusterId)) continue;
-      const alphaMul = Math.min(a.alpha, b.alpha);
-      if (alphaMul < 0.05) continue;
-
-      let alpha = 0.12;
-      let width = 1;
-      if (link.kind === "spine") {
-        alpha = 0.22;
-        width = 1.4;
-      }
-      if (link.kind === "branch") {
-        alpha = 0.35 * alphaMul;
-        width = 1.1;
-      }
-      if (link.kind === "ring") {
-        alpha = 0.07;
-        width = 0.8;
-      }
-
-      const hovered =
-        this.hovered &&
-        ((this.hovered === a && (b.type !== "leaf" || b.visible)) ||
-          (this.hovered === b && (a.type !== "leaf" || a.visible)) ||
-          (this.hovered.clusterId &&
-            (a.clusterId === this.hovered.clusterId || b.clusterId === this.hovered.clusterId) &&
-            link.kind !== "ring"));
-
-      if (hovered) alpha = Math.min(0.55, alpha + 0.2);
+      const bothInFocus = !this.focusIds || (this.focusIds.has(a.id) && this.focusIds.has(b.id));
+      const alphaMul = Math.min(a.dispAlpha, b.dispAlpha);
+      let alpha = link.kind === "spine" ? 0.28 : 0.2;
+      if (!bothInFocus) alpha *= 0.25;
+      alpha *= alphaMul;
 
       ctx.beginPath();
       ctx.moveTo(a.x, a.y);
       ctx.lineTo(b.x, b.y);
-      ctx.strokeStyle = `${COLORS.line}${alpha})`;
-      ctx.lineWidth = width / this.camera.scale;
+      ctx.strokeStyle = `${COLORS.edge}${alpha})`;
+      ctx.lineWidth = (link.kind === "spine" ? 1.2 : 1) / this.camera.scale;
       ctx.stroke();
     }
 
-    // nodes
+    // nodos
     for (const n of this.nodes) {
-      if (n.type === "leaf" && !n.visible && n.alpha < 0.02) continue;
       const isHover = this.hovered === n;
       const isSel = this.selected === n;
-      const pulse = 0.5 + 0.5 * Math.sin(n.pulse);
-      const [r, g, b] = n.rgb || [239, 122, 30];
+      const inFocus = !this.focusIds || this.focusIds.has(n.id);
+      const [r, g, b] = n.rgb || [180, 180, 185];
 
       ctx.save();
-      ctx.globalAlpha = Math.max(0, Math.min(1, n.alpha));
+      ctx.globalAlpha = Math.max(0.05, Math.min(1, n.dispAlpha));
 
-      // glow
-      const glowR = n.r * (n.type === "core" ? 4.2 : n.type === "hub" ? 3.2 : 2.4);
-      const glow = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, glowR);
-      const glowA = (n.type === "core" ? 0.45 : 0.28) + pulse * 0.12;
-      glow.addColorStop(0, `rgba(${r},${g},${b},${glowA})`);
-      glow.addColorStop(1, `rgba(${r},${g},${b},0)`);
-      ctx.fillStyle = glow;
-      ctx.beginPath();
-      ctx.arc(n.x, n.y, glowR, 0, Math.PI * 2);
-      ctx.fill();
-
-      // expanding rings on hubs/core (ATS motif)
-      if (n.type === "hub" || n.type === "core") {
-        const ringT = (n.pulse % 2) / 2;
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, n.r + 6 + ringT * 16, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(${r},${g},${b},${(1 - ringT) * 0.35})`;
-        ctx.lineWidth = 1.2 / this.camera.scale;
-        ctx.stroke();
-      }
-
-      // body
       const rad = n.r * (isHover || isSel ? 1.25 : 1);
-      const body = ctx.createRadialGradient(n.x - rad * 0.3, n.y - rad * 0.3, 0, n.x, n.y, rad);
-      if (n.type === "core") {
-        body.addColorStop(0, "#F6A862");
-        body.addColorStop(1, COLORS.navy);
-      } else {
-        body.addColorStop(0, `rgba(${Math.min(255, r + 40)},${Math.min(255, g + 40)},${Math.min(255, b + 20)},1)`);
-        body.addColorStop(1, `rgba(${r},${g},${b},1)`);
-      }
       ctx.beginPath();
       ctx.arc(n.x, n.y, rad, 0, Math.PI * 2);
-      ctx.fillStyle = body;
+      ctx.fillStyle = `rgb(${r},${g},${b})`;
       ctx.fill();
 
       if (isHover || isSel) {
-        ctx.strokeStyle = "rgba(255,255,255,.55)";
+        ctx.strokeStyle = "rgba(255,255,255,.65)";
         ctx.lineWidth = 1.5 / this.camera.scale;
+        ctx.stroke();
+      } else if (this.focusIds && inFocus && n.type !== "core") {
+        ctx.strokeStyle = `rgba(${r},${g},${b},.5)`;
+        ctx.lineWidth = 1 / this.camera.scale;
         ctx.stroke();
       }
 
-      // labels
-      if (n.type === "hub" || (n.type === "leaf" && n.alpha > 0.7 && this.camera.scale > 1.1) || n.type === "core") {
-        const label = n.type === "hub" ? this._shortLabel(n.label, 22) : n.type === "core" ? "" : this._shortLabel(n.label, 28);
+      // etiquetas: hub/core siempre, leaf sólo si hay zoom o está resaltado
+      const showLabel =
+        n.type !== "leaf" || this.camera.scale > 0.85 || (this.focusIds && this.focusIds.has(n.id));
+      if (showLabel && n.dispAlpha > 0.3) {
+        const label = this._shortLabel(n.label, n.type === "hub" ? 24 : 26);
         if (label) {
-          ctx.font = `${n.type === "hub" ? 600 : 500} ${11 / this.camera.scale}px "DM Sans", sans-serif`;
-          ctx.fillStyle = `rgba(255,255,255,${0.55 + n.alpha * 0.35})`;
+          ctx.font = `${n.type === "hub" || n.type === "core" ? 600 : 500} ${11 / this.camera.scale}px "DM Sans", sans-serif`;
+          ctx.fillStyle = `rgba(220,221,222,${0.5 + n.dispAlpha * 0.4})`;
           ctx.textAlign = "center";
           ctx.textBaseline = "top";
-          ctx.fillText(label, n.x, n.y + rad + 6 / this.camera.scale);
-        }
-        if (n.type === "hub" && !n.expanded) {
-          ctx.font = `500 ${9 / this.camera.scale}px "DM Sans", sans-serif`;
-          ctx.fillStyle = `rgba(201,206,218,${0.45 * n.alpha})`;
-          ctx.fillText(`${n.count}`, n.x, n.y + rad + 18 / this.camera.scale);
+          ctx.fillText(label, n.x, n.y + rad + 5 / this.camera.scale);
         }
       }
 
@@ -928,9 +795,9 @@ class ForceBrain {
 
 const LOADER_STEPS = [
   "Sincronizando áreas de conocimiento…",
-  "Conectando células de trabajo…",
+  "Conectando notas…",
   "Mapeando decisiones recientes…",
-  "Calibrando la red neuronal…",
+  "Armando el grafo…",
 ];
 
 function runLoader(onReady) {
@@ -938,7 +805,7 @@ function runLoader(onReady) {
   const sub = document.getElementById("loader-sub");
   const fill = document.getElementById("loader-fill");
   let step = 0;
-  const totalMs = 2400;
+  const totalMs = 1600;
   const tickMs = totalMs / LOADER_STEPS.length;
 
   const interval = setInterval(() => {
@@ -950,7 +817,7 @@ function runLoader(onReady) {
       setTimeout(() => {
         sub.textContent = LOADER_STEPS[step];
         sub.style.opacity = "1";
-      }, 160);
+      }, 140);
     }
     if (step >= LOADER_STEPS.length) {
       clearInterval(interval);
@@ -959,24 +826,21 @@ function runLoader(onReady) {
       setTimeout(() => {
         loader.classList.add("is-done");
         onReady();
-      }, 420);
+      }, 350);
     }
   }, tickMs);
 
   fill.style.width = `${100 / LOADER_STEPS.length}%`;
 }
 
-createParticles(30);
-
 loadBrainData()
   .then((data) => {
     const canvas = document.getElementById("brain");
     const brain = new ForceBrain(canvas, data);
     runLoader(() => {
-      // Soft intro: pull back then settle, then start guided tour
-      brain.camera.scale = 0.55;
+      brain.camera.scale = 0.6;
       brain.camera.targetScale = 1;
-      setTimeout(() => brain.startTour(), 700);
+      setTimeout(() => brain.startTour(), 600);
     });
   })
   .catch((err) => {
@@ -984,8 +848,8 @@ loadBrainData()
     const loader = document.getElementById("loader");
     const sub = document.getElementById("loader-sub");
     sub.textContent = "No se pudieron cargar los datos. Revisá data.js.";
-    sub.style.color = "#F6A862";
+    sub.style.color = "#EF7A1E";
     document.getElementById("hint").innerHTML =
-      `<p style="color:#F6A862">No se pudieron cargar los datos del cerebro. Revisá data.js.</p>`;
-    setTimeout(() => loader.classList.add("is-done"), 1200);
+      `<p style="color:#EF7A1E">No se pudieron cargar los datos del cerebro. Revisá data.js.</p>`;
+    setTimeout(() => loader.classList.add("is-done"), 1000);
   });

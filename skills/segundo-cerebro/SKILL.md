@@ -3,7 +3,7 @@ name: segundo-cerebro
 description: >
   Use this skill when the user wants a visual map of their ProfesIA agent staff and what the plugin knows about their profession — phrases like "generá mi segundo cerebro", "quiero ver el mapa de mis agentes", "cómo trabajan mis agentes", "mostrame cómo se organizan los agentes de ProfesIA", "quiero ver qué información cargué", or "armá un gráfico de mi segundo cerebro".
 metadata:
-  version: "0.1.0"
+  version: "0.2.0"
 ---
 
 # Segundo Cerebro de Agentes ProfesIA
@@ -23,11 +23,15 @@ agentes del plugin.
 
 ## Qué es esta visualización
 
-Es un motor de grafo en Canvas 2D (sin librerías, sin Three.js/D3) con la estética de ProfesIA
-(fondo oscuro, blooms naranja/navy, partículas). Un núcleo central ("Vos") se conecta a un hub por
-cada grupo relevante (sus equipos con agentes activos, cómo trabaja, sus tareas); cada hub, al hacer
-click, expande sus nodos alrededor. Ya viene armado en `references/` — tu trabajo es generar los
-DATOS (`data.js` + `data/brain.json`) reflejando a esta persona puntual, no tocar el motor.
+Es un motor de grafo en Canvas 2D (sin librerías, sin Three.js/D3) con el mismo lenguaje visual e
+interacción que el graph view de Obsidian: fondo plano oscuro, nodos chatos sin glow (tamaño según
+su cantidad de conexiones), líneas finas y **todo el mapa visible desde el arranque** — nada queda
+oculto detrás de un click. Un núcleo central ("Yo") se conecta a un hub por cada grupo relevante
+(sus equipos con agentes activos, cómo trabaja, sus tareas), y cada hub a sus propios nodos. Al
+pasar el mouse por un nodo (o tocar la leyenda de abajo a la izquierda, o buscar por texto) se
+resalta ese nodo + sus vecinos directos y se atenúa el resto — igual que en Obsidian. Ya viene
+armado en `references/` — tu trabajo es generar los DATOS (`data.js` + `data/brain.json`)
+reflejando a esta persona puntual, no tocar el motor.
 
 **Importante — esto NO es un catálogo genérico:** el mapa tiene que ser el de ESTA persona, con SUS
 agentes activos, SUS casos de uso, SU dolor/zona de genio y SUS tareas — no un volcado de los 27
@@ -112,8 +116,7 @@ Reglas clave (para no repetir el error de mostrar el catálogo completo):
 ## Paso 3 · Generar los archivos de salida
 
 1. Elegí como carpeta de salida `segundo-cerebro/` en la raíz del proyecto (creala si no existe).
-2. Copiá tal cual (sin modificar) desde `references/`: `index.html`, `styles.css`, `brain.js` y
-   `grain.png`.
+2. Copiá tal cual (sin modificar) desde `references/`: `index.html`, `styles.css` y `brain.js`.
 3. Escribí el payload del Paso 2 en dos archivos dentro de esa carpeta:
    - `data.js` con `window.__BRAIN_DATA__ = {...};`
    - `data/brain.json` con el mismo JSON (por si en el futuro se sirve con un servidor local).
@@ -121,10 +124,12 @@ Reglas clave (para no repetir el error de mostrar el catálogo completo):
 ## Paso 4 · Cierre
 
 Decile al usuario que abra `segundo-cerebro/index.html` con doble click (funciona directo con
-`file://`, no hace falta servidor) y qué se va a encontrar: un núcleo central, un hub por cada
-equipo donde tiene agentes activos (no los 5 equipos completos si no los usa todos), el cluster
-"Cómo trabajás" con su dolor/zona de genio, y "Tus tareas (bitácora)" con lo último que registró. Si
-el mapa salió chico o vacío, es señal de que todavía no completó bien `profesia.config.md` — sugerile
+`file://`, no hace falta servidor) y qué se va a encontrar: un mapa completo y ya armado desde que
+abre el archivo (nada que expandir con click) con un núcleo central, un hub por cada equipo donde
+tiene agentes activos (no los 5 equipos completos si no los usa todos), el cluster "Cómo trabajás"
+con su dolor/zona de genio, y "Tus tareas (bitácora)" con lo último que registró — y que puede pasar
+el mouse por cualquier nodo para ver sus conexiones resaltadas, o usar el buscador de arriba. Si el
+mapa salió chico o vacío, es señal de que todavía no completó bien `profesia.config.md` — sugerile
 correr `configuracion-inicial` (o el check-in de bitácora) y volver a generar el mapa después.
 
 No hace falta ningún servidor ni dependencia externa — todo el motor ya viene armado en
